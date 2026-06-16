@@ -1,47 +1,58 @@
-import { useMemo, useState } from 'react'
-import { Badge, Button, Card, Group, List, Loader, Select, SimpleGrid, Text, TextInput } from '@mantine/core'
-import { useQuery } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
-import { getAmbulancias } from '../../../api/ambulancias'
-import { queryKeys } from '../../../api/queryKeys'
-import type { AmbulanciaEstado } from '../../../types/api'
-import { BODEGA_PATENTE } from '../constants'
+import { useMemo, useState } from "react";
+import {
+  Badge,
+  Button,
+  Card,
+  Group,
+  List,
+  Loader,
+  Select,
+  SimpleGrid,
+  Text,
+  TextInput,
+} from "@mantine/core";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { getAmbulancias } from "../../../api/ambulancias";
+import { queryKeys } from "../../../api/queryKeys";
+import type { AmbulanciaEstado } from "../../../types/api";
+import { BODEGA_PATENTE } from "../constants";
 
 const ESTADO_COLOR: Record<AmbulanciaEstado, string> = {
-  disponible: 'green',
-  en_despacho: 'yellow',
-  mantencion: 'red',
-  fuera_servicio: 'gray',
-}
+  disponible: "green",
+  en_despacho: "yellow",
+  mantencion: "red",
+  fuera_servicio: "gray",
+};
 
 const ESTADO_OPTIONS: { value: AmbulanciaEstado; label: string }[] = [
-  { value: 'disponible', label: 'Disponible' },
-  { value: 'en_despacho', label: 'En despacho' },
-  { value: 'mantencion', label: 'Mantención' },
-  { value: 'fuera_servicio', label: 'Fuera de servicio' },
-]
+  { value: "disponible", label: "Disponible" },
+  { value: "en_despacho", label: "En despacho" },
+  { value: "mantencion", label: "Mantención" },
+  { value: "fuera_servicio", label: "Fuera de servicio" },
+];
 
 export function AmbulanceGrid() {
-  const navigate = useNavigate()
-  const [search, setSearch] = useState('')
-  const [estadoFilter, setEstadoFilter] = useState<string | null>(null)
+  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [estadoFilter, setEstadoFilter] = useState<string | null>(null);
 
   const ambulancias = useQuery({
     queryKey: queryKeys.ambulancias.list(),
     queryFn: getAmbulancias,
-  })
+  });
 
   const rows = useMemo(() => {
-    const term = search.trim().toLowerCase()
+    const term = search.trim().toLowerCase();
     return (ambulancias.data ?? []).filter((amb) => {
-      if (amb.patente === BODEGA_PATENTE) return false
-      if (estadoFilter && amb.estado !== estadoFilter) return false
-      if (term && !amb.patente.toLowerCase().includes(term)) return false
-      return true
-    })
-  }, [ambulancias.data, search, estadoFilter])
+      if (amb.patente === BODEGA_PATENTE) return false;
+      if (estadoFilter && amb.estado !== estadoFilter) return false;
+      if (term && !amb.patente.toLowerCase().includes(term)) return false;
+      return true;
+    });
+  }, [ambulancias.data, search, estadoFilter]);
 
-  if (ambulancias.isLoading) return <Loader />
+  if (ambulancias.isLoading) return <Loader />;
 
   return (
     <>
@@ -79,10 +90,22 @@ export function AmbulanceGrid() {
                   {item.insumo_nombre}: {item.stock} {item.unidad_medida}
                 </List.Item>
               ))}
-              {amb.stock.length === 0 && <Text size="sm" c="dimmed">Sin stock registrado</Text>}
-              {amb.stock.length > 5 && <Text size="xs" c="dimmed">+{amb.stock.length - 5} más</Text>}
+              {amb.stock.length === 0 && (
+                <Text size="sm" c="dimmed">
+                  Sin stock registrado
+                </Text>
+              )}
+              {amb.stock.length > 5 && (
+                <Text size="xs" c="dimmed">
+                  +{amb.stock.length - 5} más
+                </Text>
+              )}
             </List>
-            <Button size="xs" variant="light" onClick={() => navigate(`/flota/${amb.ambulancia_id}`)}>
+            <Button
+              size="xs"
+              variant="light"
+              onClick={() => navigate(`/flota/${amb.ambulancia_id}`)}
+            >
               Ver detalle
             </Button>
           </Card>
@@ -95,5 +118,5 @@ export function AmbulanceGrid() {
         </Text>
       )}
     </>
-  )
+  );
 }

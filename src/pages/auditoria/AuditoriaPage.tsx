@@ -1,40 +1,58 @@
-import { useEffect, useMemo, useState } from 'react'
-import { ActionIcon, Anchor, Badge, Group, Loader, MultiSelect, ScrollArea, Stack, Table, Text, TextInput, Title, Tooltip } from '@mantine/core'
-import { IconRefresh } from '@tabler/icons-react'
-import dayjs from 'dayjs'
-import { Link } from 'react-router-dom'
-import { streamLogs } from '../../api/logs'
-import type { LogEntry, LogTipo } from '../../types/api'
+import { useEffect, useMemo, useState } from "react";
+import {
+  ActionIcon,
+  Anchor,
+  Badge,
+  Group,
+  Loader,
+  MultiSelect,
+  ScrollArea,
+  Stack,
+  Table,
+  Text,
+  TextInput,
+  Title,
+  Tooltip,
+} from "@mantine/core";
+import { IconRefresh } from "@tabler/icons-react";
+import dayjs from "dayjs";
+import { Link } from "react-router-dom";
+import { streamLogs } from "../../api/logs";
+import type { LogEntry, LogTipo } from "../../types/api";
 
 const TIPO_OPTIONS: { value: LogTipo; label: string }[] = [
-  { value: 'atencion', label: 'Atención' },
-  { value: 'inventario', label: 'Inventario' },
-  { value: 'ambulancia', label: 'Ambulancia' },
-  { value: 'despacho', label: 'Despacho' },
-  { value: 'grupo', label: 'Grupo' },
-  { value: 'paciente', label: 'Paciente' },
-]
+  { value: "atencion", label: "Atención" },
+  { value: "inventario", label: "Inventario" },
+  { value: "ambulancia", label: "Ambulancia" },
+  { value: "despacho", label: "Despacho" },
+  { value: "grupo", label: "Grupo" },
+  { value: "paciente", label: "Paciente" },
+];
 
 const TIPO_COLOR: Record<LogTipo, string> = {
-  atencion: 'blue',
-  inventario: 'teal',
-  ambulancia: 'grape',
-  despacho: 'orange',
-  grupo: 'indigo',
-  paciente: 'pink',
-}
+  atencion: "blue",
+  inventario: "teal",
+  ambulancia: "grape",
+  despacho: "orange",
+  grupo: "indigo",
+  paciente: "pink",
+};
 
 export function AuditoriaPage() {
-  const [tipos, setTipos] = useState<string[]>([])
-  const [search, setSearch] = useState('')
-  const [refreshKey, setRefreshKey] = useState(0)
+  const [tipos, setTipos] = useState<string[]>([]);
+  const [search, setSearch] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   return (
     <Stack gap="md">
       <Group justify="space-between" align="flex-end">
         <Title order={2}>Auditoría</Title>
         <Tooltip label="Reiniciar feed">
-          <ActionIcon variant="light" size="lg" onClick={() => setRefreshKey((k) => k + 1)}>
+          <ActionIcon
+            variant="light"
+            size="lg"
+            onClick={() => setRefreshKey((k) => k + 1)}
+          >
             <IconRefresh size={18} />
           </ActionIcon>
         </Tooltip>
@@ -61,47 +79,58 @@ export function AuditoriaPage() {
 
       <AuditLogFeed key={refreshKey} tipos={tipos} search={search} />
     </Stack>
-  )
+  );
 }
 
 interface AuditLogFeedProps {
-  tipos: string[]
-  search: string
+  tipos: string[];
+  search: string;
 }
 
 function AuditLogFeed({ tipos, search }: AuditLogFeedProps) {
-  const [entries, setEntries] = useState<LogEntry[]>([])
-  const [streaming, setStreaming] = useState(true)
+  const [entries, setEntries] = useState<LogEntry[]>([]);
+  const [streaming, setStreaming] = useState(true);
 
   useEffect(() => {
-    const controller = new AbortController()
-    streamLogs((entry) => setEntries((current) => [...current, entry]), controller.signal)
+    const controller = new AbortController();
+    streamLogs(
+      (entry) => setEntries((current) => [...current, entry]),
+      controller.signal,
+    )
       .catch((err) => {
-        if (!controller.signal.aborted) console.error('Error al transmitir logs', err)
+        if (!controller.signal.aborted)
+          console.error("Error al transmitir logs", err);
       })
-      .finally(() => setStreaming(false))
-    return () => controller.abort()
-  }, [])
+      .finally(() => setStreaming(false));
+    return () => controller.abort();
+  }, []);
 
   const filtered = useMemo(() => {
-    const term = search.trim().toLowerCase()
+    const term = search.trim().toLowerCase();
     const result = entries.filter((e) => {
-      if (tipos.length > 0 && !tipos.includes(e.tipo)) return false
-      if (!term) return true
-      return e.descripcion.toLowerCase().includes(term) || e.rut.toLowerCase().includes(term)
-    })
-    return result.slice().reverse()
-  }, [entries, tipos, search])
+      if (tipos.length > 0 && !tipos.includes(e.tipo)) return false;
+      if (!term) return true;
+      return (
+        e.descripcion.toLowerCase().includes(term) ||
+        e.rut.toLowerCase().includes(term)
+      );
+    });
+    return result.slice().reverse();
+  }, [entries, tipos, search]);
 
   return (
     <Stack gap="md">
       {streaming ? (
         <Group gap={6}>
           <Loader size="xs" />
-          <Text size="xs" c="dimmed">Cargando feed…</Text>
+          <Text size="xs" c="dimmed">
+            Cargando feed…
+          </Text>
         </Group>
       ) : (
-        <Text size="xs" c="dimmed">{entries.length} registros</Text>
+        <Text size="xs" c="dimmed">
+          {entries.length} registros
+        </Text>
       )}
 
       <ScrollArea.Autosize mah="calc(100vh - 280px)">
@@ -127,14 +156,21 @@ function AuditLogFeed({ tipos, search }: AuditLogFeedProps) {
                 </Table.Td>
                 <Table.Td>{e.descripcion}</Table.Td>
                 <Table.Td>{e.rut}</Table.Td>
-                <Table.Td>{e.created_at ? dayjs(e.created_at).format('DD/MM/YYYY HH:mm') : '—'}</Table.Td>
+                <Table.Td>
+                  {e.created_at
+                    ? dayjs(e.created_at).format("DD/MM/YYYY HH:mm")
+                    : "—"}
+                </Table.Td>
                 <Table.Td>
                   {e.atencion_id !== null ? (
-                    <Anchor component={Link} to={`/atenciones/${e.atencion_id}`}>
+                    <Anchor
+                      component={Link}
+                      to={`/atenciones/${e.atencion_id}`}
+                    >
                       #{e.atencion_id}
                     </Anchor>
                   ) : (
-                    '—'
+                    "—"
                   )}
                 </Table.Td>
               </Table.Tr>
@@ -152,5 +188,5 @@ function AuditLogFeed({ tipos, search }: AuditLogFeedProps) {
         </Table>
       </ScrollArea.Autosize>
     </Stack>
-  )
+  );
 }

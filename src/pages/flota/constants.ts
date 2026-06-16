@@ -1,1 +1,1 @@
-export const BODEGA_PATENTE = 'BODEGA'
+export const BODEGA_PATENTE = "BODEGA";

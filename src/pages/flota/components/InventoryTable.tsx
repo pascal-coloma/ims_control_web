@@ -1,61 +1,93 @@
-import { useMemo, useState } from 'react'
-import { Button, Group, Loader, Select, Table, Text, TextInput } from '@mantine/core'
-import { useQuery } from '@tanstack/react-query'
-import { getAmbulancias } from '../../../api/ambulancias'
-import { getInventario } from '../../../api/inventario'
-import { queryKeys } from '../../../api/queryKeys'
-import { AdjustStockModal, type AdjustStockTarget } from './AdjustStockModal'
-import { MoveStockModal, type MoveStockTarget } from './MoveStockModal'
+import { useMemo, useState } from "react";
+import {
+  Button,
+  Group,
+  Loader,
+  Select,
+  Table,
+  Text,
+  TextInput,
+} from "@mantine/core";
+import { useQuery } from "@tanstack/react-query";
+import { getAmbulancias } from "../../../api/ambulancias";
+import { getInventario } from "../../../api/inventario";
+import { queryKeys } from "../../../api/queryKeys";
+import { AdjustStockModal, type AdjustStockTarget } from "./AdjustStockModal";
+import { MoveStockModal, type MoveStockTarget } from "./MoveStockModal";
 
 interface InventoryTableProps {
-  lockedAmbulanciaPatente?: string
+  lockedAmbulanciaPatente?: string;
 }
 
-export function InventoryTable({ lockedAmbulanciaPatente }: InventoryTableProps = {}) {
-  const [search, setSearch] = useState('')
-  const [categoriaFilter, setCategoriaFilter] = useState<string | null>(null)
-  const [ambulanciaFilter, setAmbulanciaFilter] = useState<string | null>(null)
-  const [adjustTarget, setAdjustTarget] = useState<AdjustStockTarget | null>(null)
-  const [moveTarget, setMoveTarget] = useState<MoveStockTarget | null>(null)
+export function InventoryTable({
+  lockedAmbulanciaPatente,
+}: InventoryTableProps = {}) {
+  const [search, setSearch] = useState("");
+  const [categoriaFilter, setCategoriaFilter] = useState<string | null>(null);
+  const [ambulanciaFilter, setAmbulanciaFilter] = useState<string | null>(null);
+  const [adjustTarget, setAdjustTarget] = useState<AdjustStockTarget | null>(
+    null,
+  );
+  const [moveTarget, setMoveTarget] = useState<MoveStockTarget | null>(null);
 
   const inventario = useQuery({
     queryKey: queryKeys.inventario.list(),
     queryFn: getInventario,
-  })
+  });
   const ambulancias = useQuery({
     queryKey: queryKeys.ambulancias.list(),
     queryFn: getAmbulancias,
-  })
+  });
 
   const patenteToAmbulanciaId = useMemo(() => {
-    const map = new Map<string, number>()
-    for (const a of ambulancias.data ?? []) map.set(a.patente, a.ambulancia_id)
-    return map
-  }, [ambulancias.data])
+    const map = new Map<string, number>();
+    for (const a of ambulancias.data ?? []) map.set(a.patente, a.ambulancia_id);
+    return map;
+  }, [ambulancias.data]);
 
   const categoriaOptions = useMemo(() => {
-    const seen = new Map<number, string>()
-    for (const row of inventario.data ?? []) seen.set(row.presentacion.categoria_id, row.presentacion.categoria)
-    return Array.from(seen.entries()).map(([id, nombre]) => ({ value: String(id), label: nombre }))
-  }, [inventario.data])
+    const seen = new Map<number, string>();
+    for (const row of inventario.data ?? [])
+      seen.set(row.presentacion.categoria_id, row.presentacion.categoria);
+    return Array.from(seen.entries()).map(([id, nombre]) => ({
+      value: String(id),
+      label: nombre,
+    }));
+  }, [inventario.data]);
 
   const ambulanciaOptions = useMemo(
-    () => (ambulancias.data ?? []).map((a) => ({ value: a.patente, label: a.patente })),
+    () =>
+      (ambulancias.data ?? []).map((a) => ({
+        value: a.patente,
+        label: a.patente,
+      })),
     [ambulancias.data],
-  )
+  );
 
   const rows = useMemo(() => {
-    const term = search.trim().toLowerCase()
-    const patenteFilter = lockedAmbulanciaPatente ?? ambulanciaFilter
+    const term = search.trim().toLowerCase();
+    const patenteFilter = lockedAmbulanciaPatente ?? ambulanciaFilter;
     return (inventario.data ?? []).filter((row) => {
-      if (patenteFilter && row.ambulancia.patente !== patenteFilter) return false
-      if (categoriaFilter && String(row.presentacion.categoria_id) !== categoriaFilter) return false
-      if (term && !row.presentacion.nombre.toLowerCase().includes(term)) return false
-      return true
-    })
-  }, [inventario.data, search, categoriaFilter, ambulanciaFilter, lockedAmbulanciaPatente])
+      if (patenteFilter && row.ambulancia.patente !== patenteFilter)
+        return false;
+      if (
+        categoriaFilter &&
+        String(row.presentacion.categoria_id) !== categoriaFilter
+      )
+        return false;
+      if (term && !row.presentacion.nombre.toLowerCase().includes(term))
+        return false;
+      return true;
+    });
+  }, [
+    inventario.data,
+    search,
+    categoriaFilter,
+    ambulanciaFilter,
+    lockedAmbulanciaPatente,
+  ]);
 
-  if (inventario.isLoading) return <Loader />
+  if (inventario.isLoading) return <Loader />;
 
   return (
     <>
@@ -105,14 +137,20 @@ export function InventoryTable({ lockedAmbulanciaPatente }: InventoryTableProps 
         </Table.Thead>
         <Table.Tbody>
           {rows.map((row) => {
-            const ambulanciaId = patenteToAmbulanciaId.get(row.ambulancia.patente)
+            const ambulanciaId = patenteToAmbulanciaId.get(
+              row.ambulancia.patente,
+            );
             return (
-              <Table.Tr key={`${row.presentacion.id}-${row.ambulancia.patente}`}>
+              <Table.Tr
+                key={`${row.presentacion.id}-${row.ambulancia.patente}`}
+              >
                 <Table.Td>{row.presentacion.nombre}</Table.Td>
                 <Table.Td>{row.presentacion.categoria}</Table.Td>
                 <Table.Td>{row.presentacion.unidad_medida}</Table.Td>
                 <Table.Td>{row.presentacion.cantidad}</Table.Td>
-                {!lockedAmbulanciaPatente && <Table.Td>{row.ambulancia.patente}</Table.Td>}
+                {!lockedAmbulanciaPatente && (
+                  <Table.Td>{row.ambulancia.patente}</Table.Td>
+                )}
                 <Table.Td>{row.ambulancia.stock}</Table.Td>
                 <Table.Td>
                   <Group gap="xs" wrap="nowrap">
@@ -151,7 +189,7 @@ export function InventoryTable({ lockedAmbulanciaPatente }: InventoryTableProps 
                   </Group>
                 </Table.Td>
               </Table.Tr>
-            )
+            );
           })}
           {rows.length === 0 && (
             <Table.Tr>
@@ -165,8 +203,11 @@ export function InventoryTable({ lockedAmbulanciaPatente }: InventoryTableProps 
         </Table.Tbody>
       </Table>
 
-      <AdjustStockModal target={adjustTarget} onClose={() => setAdjustTarget(null)} />
+      <AdjustStockModal
+        target={adjustTarget}
+        onClose={() => setAdjustTarget(null)}
+      />
       <MoveStockModal target={moveTarget} onClose={() => setMoveTarget(null)} />
     </>
-  )
+  );
 }

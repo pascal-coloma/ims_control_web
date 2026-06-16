@@ -1,5 +1,5 @@
-import { Navigate, Outlet } from 'react-router-dom'
-import { useAuthStore } from '../stores/authStore'
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuthStore } from "../stores/authStore";
 
 /**
  * Guards the authenticated app shell per §1.3:
@@ -9,12 +9,12 @@ import { useAuthStore } from '../stores/authStore'
  * - otherwise renders the protected routes
  */
 export function AuthGuard() {
-  const status = useAuthStore((state) => state.status)
+  const status = useAuthStore((state) => state.status);
 
-  if (status === 'unauthenticated') return <Navigate to="/login" replace />
-  if (status === 'pending_mfa') return <Navigate to="/login/mfa" replace />
+  if (status === "unauthenticated") return <Navigate to="/login" replace />;
+  if (status === "pending_mfa") return <Navigate to="/login/mfa" replace />;
 
-  return <Outlet />
+  return <Outlet />;
 }
 
 /**
@@ -22,18 +22,19 @@ export function AuthGuard() {
  * would 403 on every endpoint anyway, but this avoids a wall of error toasts.
  */
 export function RoleGuard() {
-  const user = useAuthStore((state) => state.user)
+  const user = useAuthStore((state) => state.user);
 
-  if (user && user.role !== 'control') return <Navigate to="/role-blocked" replace />
+  if (user && user.role !== "control")
+    return <Navigate to="/role-blocked" replace />;
 
-  return <Outlet />
+  return <Outlet />;
 }
 
 /** Redirects an already-authenticated control user away from /login. */
 export function GuestGuard() {
-  const status = useAuthStore((state) => state.status)
+  const status = useAuthStore((state) => state.status);
 
-  if (status === 'authenticated') return <Navigate to="/despachos" replace />
+  if (status === "authenticated") return <Navigate to="/despachos" replace />;
 
-  return <Outlet />
+  return <Outlet />;
 }

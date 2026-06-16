@@ -1,27 +1,27 @@
-import { useEffect } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { MantineProvider } from '@mantine/core'
-import { Notifications, notifications } from '@mantine/notifications'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { useEffect } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { MantineProvider } from "@mantine/core";
+import { Notifications, notifications } from "@mantine/notifications";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import '@mantine/core/styles.css'
-import '@mantine/dates/styles.css'
-import '@mantine/notifications/styles.css'
+import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
+import "@mantine/notifications/styles.css";
 
-import { setAuthHandlers } from './api/client'
-import { useAuthStore } from './stores/authStore'
-import { AppLayout } from './layout/AppLayout'
-import { AuthGuard, GuestGuard, RoleGuard } from './routes/AuthGuard'
-import { LoginPage } from './pages/auth/LoginPage'
-import { MfaPage } from './pages/auth/MfaPage'
-import { RoleBlockedPage } from './pages/auth/RoleBlockedPage'
-import { DispatchBoardPage } from './pages/despachos/DispatchBoardPage'
-import { PersonalPage } from './pages/personal/PersonalPage'
-import { GruposPage } from './pages/grupos/GruposPage'
-import { PacientesPage } from './pages/pacientes/PacientesPage'
-import { FlotaPage } from './pages/flota/FlotaPage'
-import { AtencionesPage } from './pages/atenciones/AtencionesPage'
-import { AuditoriaPage } from './pages/auditoria/AuditoriaPage'
+import { setAuthHandlers } from "./api/client";
+import { useAuthStore } from "./stores/authStore";
+import { AppLayout } from "./layout/AppLayout";
+import { AuthGuard, GuestGuard, RoleGuard } from "./routes/AuthGuard";
+import { LoginPage } from "./pages/auth/LoginPage";
+import { MfaPage } from "./pages/auth/MfaPage";
+import { RoleBlockedPage } from "./pages/auth/RoleBlockedPage";
+import { DispatchBoardPage } from "./pages/despachos/DispatchBoardPage";
+import { PersonalPage } from "./pages/personal/PersonalPage";
+import { GruposPage } from "./pages/grupos/GruposPage";
+import { PacientesPage } from "./pages/pacientes/PacientesPage";
+import { FlotaPage } from "./pages/flota/FlotaPage";
+import { AtencionesPage } from "./pages/atenciones/AtencionesPage";
+import { AuditoriaPage } from "./pages/auditoria/AuditoriaPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,22 +30,22 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
     },
   },
-})
+});
 
 function App() {
-  const logout = useAuthStore((state) => state.logout)
+  const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
     setAuthHandlers({
       onUnauthorized: () => logout({ sessionExpired: true }),
       onForbidden: () =>
         notifications.show({
-          color: 'red',
-          title: 'Permiso denegado',
-          message: 'Tu sesión no tiene acceso a este recurso.',
+          color: "red",
+          title: "Permiso denegado",
+          message: "Tu sesión no tiene acceso a este recurso.",
         }),
-    })
-  }, [logout])
+    });
+  }, [logout]);
 
   return (
     <MantineProvider defaultColorScheme="light">
@@ -84,7 +84,7 @@ function App() {
         </BrowserRouter>
       </QueryClientProvider>
     </MantineProvider>
-  )
+  );
 }
 
-export default App
+export default App;

@@ -1,76 +1,95 @@
-import { useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { ActionIcon, Button, Group, ScrollArea, SimpleGrid, Stack, Text, TextInput, Title, Tooltip } from '@mantine/core'
-import { IconPlus, IconRefresh } from '@tabler/icons-react'
-import { useQuery } from '@tanstack/react-query'
-import dayjs from 'dayjs'
-import { getAmbulancias } from '../../api/ambulancias'
-import { getDespachos } from '../../api/despachos'
-import { queryKeys } from '../../api/queryKeys'
-import type { Despacho, DespachoEstado } from '../../types/api'
-import { AssignDispatchModal } from './components/AssignDispatchModal'
-import { DispatchCard } from './components/DispatchCard'
-import { DispatchDetailDrawer } from './components/DispatchDetailDrawer'
-import { NewDispatchModal } from './components/NewDispatchModal'
-import { ScheduleDispatchModal } from './components/ScheduleDispatchModal'
+import { useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  ActionIcon,
+  Button,
+  Group,
+  ScrollArea,
+  SimpleGrid,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+  Tooltip,
+} from "@mantine/core";
+import { IconPlus, IconRefresh } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
+import { getAmbulancias } from "../../api/ambulancias";
+import { getDespachos } from "../../api/despachos";
+import { queryKeys } from "../../api/queryKeys";
+import type { Despacho, DespachoEstado } from "../../types/api";
+import { AssignDispatchModal } from "./components/AssignDispatchModal";
+import { DispatchCard } from "./components/DispatchCard";
+import { DispatchDetailDrawer } from "./components/DispatchDetailDrawer";
+import { NewDispatchModal } from "./components/NewDispatchModal";
+import { ScheduleDispatchModal } from "./components/ScheduleDispatchModal";
 
 const COLUMNS: { estado: DespachoEstado; label: string }[] = [
-  { estado: 'recibido', label: 'Recibido' },
-  { estado: 'asignado', label: 'Asignado' },
-  { estado: 'programado', label: 'Programado' },
-  { estado: 'emergencia', label: 'Emergencia' },
-]
+  { estado: "recibido", label: "Recibido" },
+  { estado: "asignado", label: "Asignado" },
+  { estado: "programado", label: "Programado" },
+  { estado: "emergencia", label: "Emergencia" },
+];
 
-const POLL_INTERVAL_MS = 120_000
+const POLL_INTERVAL_MS = 120_000;
 
 export function DispatchBoardPage() {
-  const navigate = useNavigate()
-  const { id } = useParams<{ id: string }>()
-  const detailId = id ? Number(id) : null
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const detailId = id ? Number(id) : null;
 
-  const [search, setSearch] = useState('')
-  const [newDispatchOpen, setNewDispatchOpen] = useState(false)
-  const [assignDispatchId, setAssignDispatchId] = useState<number | null>(null)
-  const [scheduleDispatchId, setScheduleDispatchId] = useState<number | null>(null)
+  const [search, setSearch] = useState("");
+  const [newDispatchOpen, setNewDispatchOpen] = useState(false);
+  const [assignDispatchId, setAssignDispatchId] = useState<number | null>(null);
+  const [scheduleDispatchId, setScheduleDispatchId] = useState<number | null>(
+    null,
+  );
 
   const despachosQuery = useQuery({
     queryKey: queryKeys.despachos.list(),
     queryFn: getDespachos,
     refetchInterval: POLL_INTERVAL_MS,
-  })
+  });
 
   const ambulanciasQuery = useQuery({
     queryKey: queryKeys.ambulancias.list(),
     queryFn: getAmbulancias,
-  })
+  });
 
   const ambulanciaPatentes = useMemo(() => {
-    const map = new Map<number, string>()
-    for (const amb of ambulanciasQuery.data ?? []) map.set(amb.ambulancia_id, amb.patente)
-    return map
-  }, [ambulanciasQuery.data])
+    const map = new Map<number, string>();
+    for (const amb of ambulanciasQuery.data ?? [])
+      map.set(amb.ambulancia_id, amb.patente);
+    return map;
+  }, [ambulanciasQuery.data]);
 
   const filtered = useMemo(() => {
-    const all = despachosQuery.data ?? []
-    const term = search.trim().toLowerCase()
+    const all = despachosQuery.data ?? [];
+    const term = search.trim().toLowerCase();
     const matches = term
       ? all.filter((d) => {
-          const direccion = d.direccion_origen?.toLowerCase() ?? ''
-          const paciente = d.paciente?.nombre_completo?.toLowerCase() ?? ''
-          return direccion.includes(term) || paciente.includes(term)
+          const direccion = d.direccion_origen?.toLowerCase() ?? "";
+          const paciente = d.paciente?.nombre_completo?.toLowerCase() ?? "";
+          return direccion.includes(term) || paciente.includes(term);
         })
-      : all
-    return matches.slice().sort((a, b) => dayjs(b.fecha_llamado).valueOf() - dayjs(a.fecha_llamado).valueOf())
-  }, [despachosQuery.data, search])
+      : all;
+    return matches
+      .slice()
+      .sort(
+        (a, b) =>
+          dayjs(b.fecha_llamado).valueOf() - dayjs(a.fecha_llamado).valueOf(),
+      );
+  }, [despachosQuery.data, search]);
 
   const columns = useMemo(() => {
-    const byEstado = new Map<DespachoEstado, Despacho[]>()
-    for (const col of COLUMNS) byEstado.set(col.estado, [])
+    const byEstado = new Map<DespachoEstado, Despacho[]>();
+    for (const col of COLUMNS) byEstado.set(col.estado, []);
     for (const despacho of filtered) {
-      byEstado.get(despacho.estado)?.push(despacho)
+      byEstado.get(despacho.estado)?.push(despacho);
     }
-    return byEstado
-  }, [filtered])
+    return byEstado;
+  }, [filtered]);
 
   return (
     <Stack gap="md">
@@ -79,7 +98,8 @@ export function DispatchBoardPage() {
           <Title order={2}>Despachos</Title>
           {despachosQuery.dataUpdatedAt > 0 && (
             <Text size="xs" c="dimmed">
-              Última sincronización: {dayjs(despachosQuery.dataUpdatedAt).format('HH:mm:ss')}
+              Última sincronización:{" "}
+              {dayjs(despachosQuery.dataUpdatedAt).format("HH:mm:ss")}
             </Text>
           )}
         </div>
@@ -94,7 +114,10 @@ export function DispatchBoardPage() {
               <IconRefresh size={18} />
             </ActionIcon>
           </Tooltip>
-          <Button leftSection={<IconPlus size={16} />} onClick={() => setNewDispatchOpen(true)}>
+          <Button
+            leftSection={<IconPlus size={16} />}
+            onClick={() => setNewDispatchOpen(true)}
+          >
             Nuevo
           </Button>
         </Group>
@@ -109,7 +132,7 @@ export function DispatchBoardPage() {
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="md">
         {COLUMNS.map((col) => {
-          const items = columns.get(col.estado) ?? []
+          const items = columns.get(col.estado) ?? [];
           return (
             <Stack key={col.estado} gap="xs">
               <Text fw={700} size="sm">
@@ -122,7 +145,9 @@ export function DispatchBoardPage() {
                       key={despacho.id}
                       despacho={despacho}
                       ambulanciaPatente={
-                        despacho.ambulancia_id ? ambulanciaPatentes.get(despacho.ambulancia_id) : undefined
+                        despacho.ambulancia_id
+                          ? ambulanciaPatentes.get(despacho.ambulancia_id)
+                          : undefined
                       }
                       onClick={() => navigate(`/despachos/${despacho.id}`)}
                       onAssign={() => setAssignDispatchId(despacho.id)}
@@ -132,28 +157,39 @@ export function DispatchBoardPage() {
                 </Stack>
               </ScrollArea.Autosize>
             </Stack>
-          )
+          );
         })}
       </SimpleGrid>
 
-      <NewDispatchModal opened={newDispatchOpen} onClose={() => setNewDispatchOpen(false)} />
+      <NewDispatchModal
+        opened={newDispatchOpen}
+        onClose={() => setNewDispatchOpen(false)}
+      />
 
       {detailId !== null && (
         <DispatchDetailDrawer
           despachoId={detailId}
           opened
-          onClose={() => navigate('/despachos')}
+          onClose={() => navigate("/despachos")}
           onAssign={() => setAssignDispatchId(detailId)}
           onSchedule={() => setScheduleDispatchId(detailId)}
         />
       )}
 
       {assignDispatchId !== null && (
-        <AssignDispatchModal despachoId={assignDispatchId} opened onClose={() => setAssignDispatchId(null)} />
+        <AssignDispatchModal
+          despachoId={assignDispatchId}
+          opened
+          onClose={() => setAssignDispatchId(null)}
+        />
       )}
       {scheduleDispatchId !== null && (
-        <ScheduleDispatchModal despachoId={scheduleDispatchId} opened onClose={() => setScheduleDispatchId(null)} />
+        <ScheduleDispatchModal
+          despachoId={scheduleDispatchId}
+          opened
+          onClose={() => setScheduleDispatchId(null)}
+        />
       )}
     </Stack>
-  )
+  );
 }

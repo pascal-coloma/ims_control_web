@@ -1,31 +1,37 @@
-import { get, patch, post } from './client'
-import type { AddInventarioItem, InventarioDetail, InventarioRow } from '../types/api'
+import { get, patch, post } from "./client";
+import type {
+  AddInventarioItem,
+  InventarioDetail,
+  InventarioRow,
+} from "../types/api";
 
 export function getInventario(): Promise<InventarioRow[]> {
-  return get<InventarioRow[]>('/ims/api/inv/')
+  return get<InventarioRow[]>("/ims/api/inv/");
 }
 
-export function getInventarioByInsumo(insumoId: number): Promise<InventarioDetail> {
-  return get<InventarioDetail>(`/ims/api/inv/?insumo_id=${insumoId}`)
+export function getInventarioByInsumo(
+  insumoId: number,
+): Promise<InventarioDetail> {
+  return get<InventarioDetail>(`/ims/api/inv/?insumo_id=${insumoId}`);
 }
 
 export function addInventario(items: AddInventarioItem[]): Promise<unknown> {
-  return post('/ims/api/inv/add/', { items })
+  return post("/ims/api/inv/add/", { items });
 }
 
 export function updateInventario(data: {
-  presentacion_id: number
-  ambulancia_id: number
-  cantidad: number
+  presentacion_id: number;
+  ambulancia_id: number;
+  cantidad: number;
 }): Promise<unknown> {
-  return patch('/ims/api/inv/update/', data)
+  return patch("/ims/api/inv/update/", data);
 }
 
 export function moveInventario(data: {
-  presentacion_id: number
-  ambulancia_from_id: number
-  ambulancia_to_id: number
-  cantidad: number
+  presentacion_id: number;
+  ambulancia_from_id: number;
+  ambulancia_to_id: number;
+  cantidad: number;
 }): Promise<unknown> {
-  return patch('/ims/api/inv/move/', data)
+  return patch("/ims/api/inv/move/", data);
 }

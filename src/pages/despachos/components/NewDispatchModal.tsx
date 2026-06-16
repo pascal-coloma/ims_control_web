@@ -1,33 +1,42 @@
-import { useMemo, useState } from 'react'
-import { Button, Group, Modal, Select, Stack, Switch, Textarea, TextInput } from '@mantine/core'
-import { DateTimePicker } from '@mantine/dates'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { addDespacho, programarDespacho } from '../../../api/despachos'
-import { getGrupos } from '../../../api/grupos'
-import { queryKeys } from '../../../api/queryKeys'
-import { PatientLookupOrRegister } from '../../../components/patients/PatientLookupOrRegister'
-import type { Paciente } from '../../../types/api'
+import { useMemo, useState } from "react";
+import {
+  Button,
+  Group,
+  Modal,
+  Select,
+  Stack,
+  Switch,
+  Textarea,
+  TextInput,
+} from "@mantine/core";
+import { DateTimePicker } from "@mantine/dates";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { addDespacho, programarDespacho } from "../../../api/despachos";
+import { getGrupos } from "../../../api/grupos";
+import { queryKeys } from "../../../api/queryKeys";
+import { PatientLookupOrRegister } from "../../../components/patients/PatientLookupOrRegister";
+import type { Paciente } from "../../../types/api";
 
 interface NewDispatchModalProps {
-  opened: boolean
-  onClose: () => void
+  opened: boolean;
+  onClose: () => void;
 }
 
 export function NewDispatchModal({ opened, onClose }: NewDispatchModalProps) {
-  const queryClient = useQueryClient()
-  const [paciente, setPaciente] = useState<Paciente | null>(null)
-  const [direccionOrigen, setDireccionOrigen] = useState('')
-  const [direccionDestino, setDireccionDestino] = useState('')
-  const [descripcion, setDescripcion] = useState('')
-  const [isEmergency, setIsEmergency] = useState(true)
-  const [fecha, setFecha] = useState<Date | null>(null)
-  const [grupoId, setGrupoId] = useState<string | null>(null)
+  const queryClient = useQueryClient();
+  const [paciente, setPaciente] = useState<Paciente | null>(null);
+  const [direccionOrigen, setDireccionOrigen] = useState("");
+  const [direccionDestino, setDireccionDestino] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [isEmergency, setIsEmergency] = useState(true);
+  const [fecha, setFecha] = useState<Date | null>(null);
+  const [grupoId, setGrupoId] = useState<string | null>(null);
 
   const grupos = useQuery({
     queryKey: queryKeys.grupos.list(),
     queryFn: getGrupos,
     enabled: opened && !isEmergency,
-  })
+  });
 
   const grupoOptions = useMemo(
     () =>
@@ -36,7 +45,7 @@ export function NewDispatchModal({ opened, onClose }: NewDispatchModalProps) {
         label: `${g.grupo_nombre} (${g.miembros.length} miembros)`,
       })),
     [grupos.data],
-  )
+  );
 
   const create = useMutation({
     mutationFn: async () => {
@@ -45,38 +54,45 @@ export function NewDispatchModal({ opened, onClose }: NewDispatchModalProps) {
         direccion_destino: direccionDestino || undefined,
         descripcion_llamado: descripcion || undefined,
         paciente_rut: (paciente as Paciente).rut,
-      })
+      });
       if (!isEmergency) {
         await programarDespacho({
           despacho_id: response.despacho.id,
           fecha_programada: (fecha as Date).toISOString(),
           grupo_id: Number(grupoId),
-        })
+        });
       }
-      return response
+      return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.despachos.list() })
-      handleClose()
+      queryClient.invalidateQueries({ queryKey: queryKeys.despachos.list() });
+      handleClose();
     },
-  })
+  });
 
   function handleClose() {
-    setPaciente(null)
-    setDireccionOrigen('')
-    setDireccionDestino('')
-    setDescripcion('')
-    setIsEmergency(true)
-    setFecha(null)
-    setGrupoId(null)
-    onClose()
+    setPaciente(null);
+    setDireccionOrigen("");
+    setDireccionDestino("");
+    setDescripcion("");
+    setIsEmergency(true);
+    setFecha(null);
+    setGrupoId(null);
+    onClose();
   }
 
   const canSubmit =
-    !!paciente && !!direccionOrigen.trim() && (isEmergency || (!!fecha && !!grupoId))
+    !!paciente &&
+    !!direccionOrigen.trim() &&
+    (isEmergency || (!!fecha && !!grupoId));
 
   return (
-    <Modal opened={opened} onClose={handleClose} title="Nuevo Despacho" size="lg">
+    <Modal
+      opened={opened}
+      onClose={handleClose}
+      title="Nuevo Despacho"
+      size="lg"
+    >
       <Stack gap="sm">
         <PatientLookupOrRegister onResolved={setPaciente} />
 
@@ -130,11 +146,15 @@ export function NewDispatchModal({ opened, onClose }: NewDispatchModalProps) {
           <Button variant="subtle" onClick={handleClose}>
             Cancelar
           </Button>
-          <Button onClick={() => create.mutate()} loading={create.isPending} disabled={!canSubmit}>
+          <Button
+            onClick={() => create.mutate()}
+            loading={create.isPending}
+            disabled={!canSubmit}
+          >
             Crear
           </Button>
         </Group>
       </Stack>
     </Modal>
-  )
+  );
 }

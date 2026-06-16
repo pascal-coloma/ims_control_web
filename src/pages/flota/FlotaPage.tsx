@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import { Button, Group, Tabs, Title } from '@mantine/core'
-import { IconPlus } from '@tabler/icons-react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { AddSuppliesModal } from './components/AddSuppliesModal'
-import { AmbulanceDetail } from './components/AmbulanceDetail'
-import { AmbulanceGrid } from './components/AmbulanceGrid'
-import { InventoryTable } from './components/InventoryTable'
-import { BODEGA_PATENTE } from './constants'
+import { useState } from "react";
+import { Button, Group, Tabs, Title } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { AddSuppliesModal } from "./components/AddSuppliesModal";
+import { AmbulanceDetail } from "./components/AmbulanceDetail";
+import { AmbulanceGrid } from "./components/AmbulanceGrid";
+import { InventoryTable } from "./components/InventoryTable";
+import { BODEGA_PATENTE } from "./constants";
 
 export function FlotaPage() {
-  const navigate = useNavigate()
-  const { id } = useParams<{ id: string }>()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [addModalOpen, setAddModalOpen] = useState(false)
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
-  const tabParam = searchParams.get('tab')
-  const tab = tabParam === 'ambulancias' || tabParam === 'global' ? tabParam : 'bodega'
+  const tabParam = searchParams.get("tab");
+  const tab =
+    tabParam === "ambulancias" || tabParam === "global" ? tabParam : "bodega";
 
   function handleTabChange(value: string | null) {
-    setSearchParams(value && value !== 'bodega' ? { tab: value } : {})
+    setSearchParams(value && value !== "bodega" ? { tab: value } : {});
   }
 
   if (id) {
-    return <AmbulanceDetail ambulanciaId={Number(id)} onBack={() => navigate('/flota')} />
+    return (
+      <AmbulanceDetail
+        ambulanciaId={Number(id)}
+        onBack={() => navigate("/flota")}
+      />
+    );
   }
 
   return (
     <>
       <Group justify="space-between" mb="md">
         <Title order={2}>Flota & Inventario</Title>
-        <Button leftSection={<IconPlus size={16} />} onClick={() => setAddModalOpen(true)}>
+        <Button
+          leftSection={<IconPlus size={16} />}
+          onClick={() => setAddModalOpen(true)}
+        >
           Agregar insumos
         </Button>
       </Group>
@@ -54,7 +63,10 @@ export function FlotaPage() {
         </Tabs.Panel>
       </Tabs>
 
-      <AddSuppliesModal opened={addModalOpen} onClose={() => setAddModalOpen(false)} />
+      <AddSuppliesModal
+        opened={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+      />
     </>
-  )
+  );
 }

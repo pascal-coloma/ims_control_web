@@ -1,27 +1,37 @@
-import type { DocumentoAtencion } from '../types/api'
+import type { DocumentoAtencion } from "../types/api";
 
 function formatearHora(hora: string | undefined): string {
-  if (!hora) return '—'
-  if (hora.includes(':')) return hora
-  if (hora.length < 4) return hora
-  return `${hora.slice(0, 2)}:${hora.slice(2, 4)}`
+  if (!hora) return "—";
+  if (hora.includes(":")) return hora;
+  if (hora.length < 4) return hora;
+  return `${hora.slice(0, 2)}:${hora.slice(2, 4)}`;
 }
 
 function formatearFechaHora(iso: string): string {
-  if (!iso) return '—'
-  const d = new Date(iso)
-  return d.toLocaleDateString('es-CL', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleDateString("es-CL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 /** Builds the signed-document HTML and opens the browser print dialog so it can be saved as PDF. */
 export function generatePDF(data: DocumentoAtencion): void {
-  const { atencion, paciente, registrado_por, recibido_por, signos_vitales, preinforme, cronologia, insumos_utilizados, Hash } = data
+  const {
+    atencion,
+    paciente,
+    registrado_por,
+    recibido_por,
+    signos_vitales,
+    preinforme,
+    cronologia,
+    insumos_utilizados,
+    Hash,
+  } = data;
 
   const signosRows = signos_vitales
     .map(
@@ -42,7 +52,7 @@ export function generatePDF(data: DocumentoAtencion): void {
     </tr>
   `,
     )
-    .join('')
+    .join("");
 
   const insumosRows = insumos_utilizados
     .map(
@@ -51,11 +61,11 @@ export function generatePDF(data: DocumentoAtencion): void {
       <td>${i.insumo__insumo__nombre_insumo}</td>
       <td>—</td>
       <td>${i.cantidad_usada}</td>
-      <td>${i.observaciones ?? '—'}</td>
+      <td>${i.observaciones ?? "—"}</td>
     </tr>
   `,
     )
-    .join('')
+    .join("");
 
   const html = `
     <!DOCTYPE html>
@@ -255,7 +265,7 @@ export function generatePDF(data: DocumentoAtencion): void {
           border: 1.5px solid #1a3a6b;
           display: inline-block;
           border-radius: 2px;
-          background: ${preinforme?.estado_paciente === 'estable' ? '#1a3a6b' : 'white'};
+          background: ${preinforme?.estado_paciente === "estable" ? "#1a3a6b" : "white"};
         }
         .checkbox-inestable {
           width: 12px;
@@ -263,7 +273,7 @@ export function generatePDF(data: DocumentoAtencion): void {
           border: 1.5px solid #1a3a6b;
           display: inline-block;
           border-radius: 2px;
-          background: ${preinforme?.estado_paciente === 'inestable' ? '#E53935' : 'white'};
+          background: ${preinforme?.estado_paciente === "inestable" ? "#E53935" : "white"};
         }
         @media print {
           body { padding: 0; }
@@ -295,11 +305,11 @@ export function generatePDF(data: DocumentoAtencion): void {
         <div class="section-body">
           <div class="field-row">
             <span class="field-label">Nombre</span>
-            <span class="field-value">${paciente?.nombre_completo ?? '—'}</span>
+            <span class="field-value">${paciente?.nombre_completo ?? "—"}</span>
           </div>
           <div class="field-row">
             <span class="field-label">RUT</span>
-            <span class="field-value">${paciente?.rut ?? '—'}</span>
+            <span class="field-value">${paciente?.rut ?? "—"}</span>
           </div>
         </div>
       </div>
@@ -331,7 +341,7 @@ export function generatePDF(data: DocumentoAtencion): void {
               </div>
               <div class="field-row">
                 <span class="field-label">Registrado por</span>
-                <span class="field-value">${registrado_por?.nombre_completo ?? '—'} (${registrado_por?.rut ?? '—'}) — ${registrado_por?.rol ?? '—'}</span>
+                <span class="field-value">${registrado_por?.nombre_completo ?? "—"} (${registrado_por?.rut ?? "—"}) — ${registrado_por?.rol ?? "—"}</span>
               </div>
             </div>
           </div>
@@ -342,11 +352,11 @@ export function generatePDF(data: DocumentoAtencion): void {
             <div class="section-body">
               <div class="field-row">
                 <span class="field-label">Motivo</span>
-                <span class="field-value">${preinforme?.motivo_llamado ?? '—'}</span>
+                <span class="field-value">${preinforme?.motivo_llamado ?? "—"}</span>
               </div>
               <div class="field-row">
                 <span class="field-label">Pre Informe</span>
-                <span class="field-value">${preinforme?.pre_informe ?? '—'}</span>
+                <span class="field-value">${preinforme?.pre_informe ?? "—"}</span>
               </div>
             </div>
           </div>
@@ -377,7 +387,7 @@ export function generatePDF(data: DocumentoAtencion): void {
                 </tr>
               </thead>
               <tbody>
-                ${insumosRows || '<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>'}
+                ${insumosRows || "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>"}
               </tbody>
             </table>
           </div>
@@ -406,7 +416,7 @@ export function generatePDF(data: DocumentoAtencion): void {
                 </tr>
               </thead>
               <tbody>
-                ${signosRows || '<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>'}
+                ${signosRows || "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>"}
               </tbody>
             </table>
           </div>
@@ -441,7 +451,7 @@ export function generatePDF(data: DocumentoAtencion): void {
               </div>
               <div class="crono-cell">
                 <div class="crono-label">Categoría</div>
-                <div class="crono-value" style="font-weight:900; font-size:16px; color:#1a3a6b;">${cronologia?.categoria ?? '—'}</div>
+                <div class="crono-value" style="font-weight:900; font-size:16px; color:#1a3a6b;">${cronologia?.categoria ?? "—"}</div>
               </div>
               <div class="crono-cell">
                 <div class="crono-label">Estado Sello</div>
@@ -456,17 +466,17 @@ export function generatePDF(data: DocumentoAtencion): void {
       <div class="firma-row">
         <div class="firma-box">
           <div class="firma-label">Médico Receptor</div>
-          <div style="font-size:10px; margin-bottom: 4px;">RUT: ${recibido_por || '—'}</div>
+          <div style="font-size:10px; margin-bottom: 4px;">RUT: ${recibido_por || "—"}</div>
           <div style="min-height: 18px;"></div>
           <div class="firma-line">Nombre y firma</div>
         </div>
         <div class="firma-box">
           <div class="firma-label">Categoría</div>
-          <div style="font-size:24px; font-weight:900; color:#1a3a6b; text-align:center; padding: 8px 0;">${cronologia?.categoria ?? '—'}</div>
+          <div style="font-size:24px; font-weight:900; color:#1a3a6b; text-align:center; padding: 8px 0;">${cronologia?.categoria ?? "—"}</div>
         </div>
         <div class="firma-box">
           <div class="firma-label">Integridad del Documento</div>
-          <div style="font-size:9px; color:#22c55e; font-weight:bold;">${atencion.estado_sello === 'Firmado' ? '✓ Documento Firmado' : 'Pendiente'}</div>
+          <div style="font-size:9px; color:#22c55e; font-weight:bold;">${atencion.estado_sello === "Firmado" ? "✓ Documento Firmado" : "Pendiente"}</div>
         </div>
       </div>
 
@@ -477,16 +487,18 @@ export function generatePDF(data: DocumentoAtencion): void {
 
     </body>
     </html>
-  `
+  `;
 
-  const printWindow = window.open('', '_blank')
+  const printWindow = window.open("", "_blank");
   if (!printWindow) {
-    throw new Error('No se pudo abrir la ventana de impresión. Verifica que los pop-ups estén permitidos en el navegador.')
+    throw new Error(
+      "No se pudo abrir la ventana de impresión. Verifica que los pop-ups estén permitidos en el navegador.",
+    );
   }
 
-  printWindow.document.open()
-  printWindow.document.write(html)
-  printWindow.document.close()
-  printWindow.focus()
-  setTimeout(() => printWindow.print(), 300)
+  printWindow.document.open();
+  printWindow.document.write(html);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => printWindow.print(), 300);
 }
