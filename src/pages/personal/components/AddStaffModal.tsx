@@ -1,8 +1,15 @@
 import { useState } from 'react'
-import { Button, Group, Modal, NumberInput, Stack, Text, TextInput } from '@mantine/core'
+import { Button, Group, Modal, Select, Stack, Text, TextInput } from '@mantine/core'
 import { useMutation } from '@tanstack/react-query'
 import { addPersonal } from '../../../api/personal'
 import type { AddStaffResponse } from '../../../types/api'
+
+const ROLES = [
+  { label: 'Control', value: '1' },
+  { label: 'Médico', value: '2' },
+  { label: 'TENS', value: '3' },
+  { label: 'Chofer', value: '4' },
+]
 
 interface AddStaffModalProps {
   opened: boolean
@@ -16,7 +23,7 @@ export function AddStaffModal({ opened, onClose, onProvisioned }: AddStaffModalP
   const [usernameTouched, setUsernameTouched] = useState(false)
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [rolId, setRolId] = useState<number | ''>('')
+  const [rolId, setRolId] = useState<string | null>(null)
 
   const create = useMutation({
     mutationFn: () =>
@@ -25,7 +32,7 @@ export function AddStaffModal({ opened, onClose, onProvisioned }: AddStaffModalP
         first_name: firstName,
         last_name: lastName,
         rut,
-        rol_id: Number(rolId),
+        rol_id: Number(rolId!),
       }),
     onSuccess: (result) => {
       onProvisioned(result)
@@ -39,11 +46,11 @@ export function AddStaffModal({ opened, onClose, onProvisioned }: AddStaffModalP
     setUsernameTouched(false)
     setFirstName('')
     setLastName('')
-    setRolId('')
+    setRolId(null)
     onClose()
   }
 
-  const valid = rut.trim() && firstName.trim() && lastName.trim() && rolId !== ''
+  const valid = rut.trim() && firstName.trim() && lastName.trim() && rolId !== null
 
   return (
     <Modal opened={opened} onClose={handleClose} title="Agregar Personal">
@@ -70,12 +77,12 @@ export function AddStaffModal({ opened, onClose, onProvisioned }: AddStaffModalP
         />
         <TextInput label="Nombre" value={firstName} onChange={(event) => setFirstName(event.currentTarget.value)} required />
         <TextInput label="Apellido" value={lastName} onChange={(event) => setLastName(event.currentTarget.value)} required />
-        <NumberInput
-          label="Rol ID"
+        <Select
+          label="Rol"
+          data={ROLES}
           value={rolId}
-          onChange={(value) => setRolId(typeof value === 'number' ? value : '')}
-          min={1}
-          description="ID numérico del rol en el catálogo de roles del backend"
+          onChange={setRolId}
+          placeholder="Seleccione un rol"
           required
         />
 
