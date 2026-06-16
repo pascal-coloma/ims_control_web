@@ -109,3 +109,7 @@ export function patch<T>(
 ): Promise<T> {
   return apiFetch<T>(path, { ...options, method: "PATCH", body });
 }
+
+export function del<T>(path: string): Promise<T> {
+  return apiFetch<T>(path, { method: "DELETE" });
+}
