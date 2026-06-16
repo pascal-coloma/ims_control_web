@@ -28,3 +28,11 @@ export function verifyTotp(totpCode: string): Promise<LoginResponse> {
     skipAuthHandlers: true,
   });
 }
+
+/** Invalidates the Django session server-side. */
+export function logoutApi(): Promise<unknown> {
+  return apiFetch("/ims/api/logout/", {
+    method: "POST",
+    skipAuthHandlers: true,
+  });
+}

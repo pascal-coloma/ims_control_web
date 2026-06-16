@@ -19,6 +19,7 @@ import {
   IconUsersGroup,
 } from "@tabler/icons-react";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { logoutApi } from "../api/auth";
 import { useAuthStore } from "../stores/authStore";
 
 const NAV_ITEMS = [
@@ -74,7 +75,7 @@ export function AppLayout() {
               variant="subtle"
               color="red"
               leftSection={<IconLogout size={16} />}
-              onClick={() => logout()}
+              onClick={() => logoutApi().finally(() => logout())}
               fullWidth
             >
               Cerrar sesión
