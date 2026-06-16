@@ -9,6 +9,7 @@ export default defineConfig({
       "/ims": {
         target: "https://api.imsambulancias.cl",
         changeOrigin: true,
+        cookieDomainRewrite: "localhost",
       },
     },
   },
