@@ -18,14 +18,11 @@ export const queryKeys = {
   },
   ambulancias: {
     list: () => ["ambulancias", "list"] as const,
-    detail: (id: number) => ["ambulancias", "detail", id] as const,
   },
   inventario: {
     list: () => ["inventario", "list"] as const,
-    detail: (insumoId: number) => ["inventario", "detail", insumoId] as const,
   },
   atenciones: {
     list: () => ["atenciones", "list"] as const,
-    doc: (id: number) => ["atenciones", "doc", id] as const,
   },
 };
