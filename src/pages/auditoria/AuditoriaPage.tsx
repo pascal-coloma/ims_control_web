@@ -123,7 +123,7 @@ function AuditLogFeed({ tipos, search }: AuditLogFeedProps) {
         e.rut.toLowerCase().includes(term)
       );
     });
-    return result.slice().reverse();
+    return result.reverse();
   }, [entries, tipos, search]);
 
   const { page, setPage, totalPages, pageItems } = usePagedData(filtered);
