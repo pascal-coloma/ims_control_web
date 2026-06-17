@@ -11,15 +11,8 @@ import { IconArrowLeft } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { getAmbulancias } from "../../../api/ambulancias";
 import { queryKeys } from "../../../api/queryKeys";
-import type { AmbulanciaEstado } from "../../../types/api";
+import { ESTADO_COLOR } from "../constants";
 import { InventoryTable } from "./InventoryTable";
-
-const ESTADO_COLOR: Record<AmbulanciaEstado, string> = {
-  disponible: "green",
-  en_despacho: "yellow",
-  mantencion: "red",
-  fuera_servicio: "gray",
-};
 
 interface AmbulanceDetailProps {
   ambulanciaId: number;

@@ -18,14 +18,7 @@ import { CardSkeleton } from "../../../components/CardSkeleton";
 import { ListPagination } from "../../../components/ListPagination";
 import { usePagedData } from "../../../hooks/usePagedData";
 import type { AmbulanciaEstado } from "../../../types/api";
-import { BODEGA_PATENTE } from "../constants";
-
-const ESTADO_COLOR: Record<AmbulanciaEstado, string> = {
-  disponible: "green",
-  en_despacho: "yellow",
-  mantencion: "red",
-  fuera_servicio: "gray",
-};
+import { BODEGA_PATENTE, ESTADO_COLOR } from "../constants";
 
 const ESTADO_OPTIONS: { value: AmbulanciaEstado; label: string }[] = [
   { value: "disponible", label: "Disponible" },
