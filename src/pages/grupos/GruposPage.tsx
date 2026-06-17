@@ -5,7 +5,7 @@ import {
   Button,
   Card,
   Group,
-  Loader,
+  Skeleton,
   Stack,
   Table,
   Title,
@@ -16,9 +16,14 @@ import dayjs from "dayjs";
 import { getGrupos } from "../../api/grupos";
 import { getPersonal } from "../../api/personal";
 import { queryKeys } from "../../api/queryKeys";
+import { ListPagination } from "../../components/ListPagination";
+import { TableSkeleton } from "../../components/TableSkeleton";
+import { DEFAULT_PAGE_SIZE, usePagedData } from "../../hooks/usePagedData";
 import { AddMemberControl } from "./components/AddMemberControl";
 import { CreateGroupModal } from "./components/CreateGroupModal";
 import { RemoveMemberButton } from "./components/RemoveMemberButton";
+
+const GROUP_COLUMN_COUNT = 5;
 
 export function GruposPage() {
   const { id } = useParams<{ id: string }>();
@@ -34,11 +39,21 @@ export function GruposPage() {
     queryFn: getPersonal,
   });
 
+  const { page, setPage, totalPages, pageItems } = usePagedData(
+    grupos.data ?? [],
+  );
+
   const rutToPersonalId = useMemo(() => {
     const map = new Map<string, number>();
     for (const p of personal.data ?? []) map.set(p.rut, p.id);
     return map;
   }, [personal.data]);
+
+  useEffect(() => {
+    if (!id || !grupos.data) return;
+    const idx = grupos.data.findIndex((g) => g.grupo_id === Number(id));
+    if (idx !== -1) setPage(Math.floor(idx / DEFAULT_PAGE_SIZE) + 1);
+  }, [id, grupos.data, setPage]);
 
   useEffect(() => {
     if (id && highlightRef.current) {
@@ -47,7 +62,7 @@ export function GruposPage() {
         block: "start",
       });
     }
-  }, [id, grupos.data]);
+  }, [id, page]);
 
   return (
     <>
@@ -62,10 +77,31 @@ export function GruposPage() {
       </Group>
 
       {grupos.isLoading ? (
-        <Loader />
+        <Stack gap="md">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <Card key={i} withBorder>
+              <Group justify="space-between" mb="sm">
+                <Skeleton height={20} width={160} radius="sm" />
+                <Skeleton height={18} width={90} radius="sm" />
+              </Group>
+              <Table striped highlightOnHover>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>Nombre</Table.Th>
+                    <Table.Th>RUT</Table.Th>
+                    <Table.Th>Rol</Table.Th>
+                    <Table.Th>Ingreso</Table.Th>
+                    <Table.Th />
+                  </Table.Tr>
+                </Table.Thead>
+                <TableSkeleton columns={GROUP_COLUMN_COUNT} rows={3} />
+              </Table>
+            </Card>
+          ))}
+        </Stack>
       ) : (
         <Stack gap="md">
-          {(grupos.data ?? []).map((grupo) => (
+          {pageItems.map((grupo) => (
             <Card
               key={grupo.grupo_id}
               withBorder
@@ -127,6 +163,7 @@ export function GruposPage() {
           ))}
         </Stack>
       )}
+      <ListPagination page={page} totalPages={totalPages} onChange={setPage} />
 
       <CreateGroupModal
         opened={createOpen}

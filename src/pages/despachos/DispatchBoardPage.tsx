@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ActionIcon,
@@ -18,6 +18,9 @@ import dayjs from "dayjs";
 import { getAmbulancias } from "../../api/ambulancias";
 import { getDespachos } from "../../api/despachos";
 import { queryKeys } from "../../api/queryKeys";
+import { CardSkeleton } from "../../components/CardSkeleton";
+import { ListPagination } from "../../components/ListPagination";
+import { usePagedData } from "../../hooks/usePagedData";
 import type { Despacho, DespachoEstado } from "../../types/api";
 import { AssignDispatchModal } from "./components/AssignDispatchModal";
 import { DispatchCard } from "./components/DispatchCard";
@@ -131,34 +134,19 @@ export function DispatchBoardPage() {
       />
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="md">
-        {COLUMNS.map((col) => {
-          const items = columns.get(col.estado) ?? [];
-          return (
-            <Stack key={col.estado} gap="xs">
-              <Text fw={700} size="sm">
-                {col.label.toUpperCase()} ({items.length})
-              </Text>
-              <ScrollArea.Autosize mah="calc(100vh - 240px)">
-                <Stack gap="xs">
-                  {items.map((despacho) => (
-                    <DispatchCard
-                      key={despacho.id}
-                      despacho={despacho}
-                      ambulanciaPatente={
-                        despacho.ambulancia_id
-                          ? ambulanciaPatentes.get(despacho.ambulancia_id)
-                          : undefined
-                      }
-                      onClick={() => navigate(`/despachos/${despacho.id}`)}
-                      onAssign={() => setAssignDispatchId(despacho.id)}
-                      onSchedule={() => setScheduleDispatchId(despacho.id)}
-                    />
-                  ))}
-                </Stack>
-              </ScrollArea.Autosize>
-            </Stack>
-          );
-        })}
+        {COLUMNS.map((col) => (
+          <DispatchColumn
+            key={col.estado}
+            label={col.label}
+            items={columns.get(col.estado) ?? []}
+            search={search}
+            ambulanciaPatentes={ambulanciaPatentes}
+            isLoading={despachosQuery.isLoading}
+            onCardClick={(id) => navigate(`/despachos/${id}`)}
+            onAssign={setAssignDispatchId}
+            onSchedule={setScheduleDispatchId}
+          />
+        ))}
       </SimpleGrid>
 
       <NewDispatchModal
@@ -190,6 +178,63 @@ export function DispatchBoardPage() {
           onClose={() => setScheduleDispatchId(null)}
         />
       )}
+    </Stack>
+  );
+}
+
+interface DispatchColumnProps {
+  label: string;
+  items: Despacho[];
+  search: string;
+  ambulanciaPatentes: Map<number, string>;
+  isLoading: boolean;
+  onCardClick: (id: number) => void;
+  onAssign: (id: number) => void;
+  onSchedule: (id: number) => void;
+}
+
+function DispatchColumn({
+  label,
+  items,
+  search,
+  ambulanciaPatentes,
+  isLoading,
+  onCardClick,
+  onAssign,
+  onSchedule,
+}: DispatchColumnProps) {
+  const { page, setPage, totalPages, pageItems } = usePagedData(items);
+
+  useEffect(() => setPage(1), [search, setPage]);
+
+  return (
+    <Stack gap="xs">
+      <Text fw={700} size="sm">
+        {label.toUpperCase()} {!isLoading && `(${items.length})`}
+      </Text>
+      <ScrollArea.Autosize mah="calc(100vh - 240px)">
+        <Stack gap="xs">
+          {isLoading
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <CardSkeleton key={i} lines={3} />
+              ))
+            : pageItems.map((despacho) => (
+                <DispatchCard
+                  key={despacho.id}
+                  despacho={despacho}
+                  ambulanciaPatente={
+                    despacho.ambulancia_id
+                      ? ambulanciaPatentes.get(despacho.ambulancia_id)
+                      : undefined
+                  }
+                  onClick={() => onCardClick(despacho.id)}
+                  onAssign={() => onAssign(despacho.id)}
+                  onSchedule={() => onSchedule(despacho.id)}
+                />
+              ))}
+        </Stack>
+      </ScrollArea.Autosize>
+      <ListPagination page={page} totalPages={totalPages} onChange={setPage} />
     </Stack>
   );
 }

@@ -1,8 +1,13 @@
-import { Card, Loader, Table, Title } from "@mantine/core";
+import { Card, Table, Title } from "@mantine/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPacientes } from "../../api/pacientes";
 import { queryKeys } from "../../api/queryKeys";
+import { ListPagination } from "../../components/ListPagination";
 import { PatientLookupOrRegister } from "../../components/patients/PatientLookupOrRegister";
+import { TableSkeleton } from "../../components/TableSkeleton";
+import { usePagedData } from "../../hooks/usePagedData";
+
+const COLUMN_COUNT = 6;
 
 export function PacientesPage() {
   const queryClient = useQueryClient();
@@ -11,6 +16,10 @@ export function PacientesPage() {
     queryKey: queryKeys.pacientes.list(),
     queryFn: getPacientes,
   });
+
+  const { page, setPage, totalPages, pageItems } = usePagedData(
+    pacientes.data ?? [],
+  );
 
   return (
     <>
@@ -34,22 +43,22 @@ export function PacientesPage() {
       <Title order={4} mb="sm">
         Registro de pacientes
       </Title>
-      {pacientes.isLoading ? (
-        <Loader />
-      ) : (
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>RUT</Table.Th>
-              <Table.Th>Nombre completo</Table.Th>
-              <Table.Th>Fecha nacimiento</Table.Th>
-              <Table.Th>Comuna</Table.Th>
-              <Table.Th>Teléfono</Table.Th>
-              <Table.Th>Condición</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
+      <Table striped highlightOnHover>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>RUT</Table.Th>
+            <Table.Th>Nombre completo</Table.Th>
+            <Table.Th>Fecha nacimiento</Table.Th>
+            <Table.Th>Comuna</Table.Th>
+            <Table.Th>Teléfono</Table.Th>
+            <Table.Th>Condición</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        {pacientes.isLoading ? (
+          <TableSkeleton columns={COLUMN_COUNT} />
+        ) : (
           <Table.Tbody>
-            {(pacientes.data ?? []).map((paciente) => (
+            {pageItems.map((paciente) => (
               <Table.Tr key={paciente.rut}>
                 <Table.Td>{paciente.rut}</Table.Td>
                 <Table.Td>{paciente.nombre_completo || "—"}</Table.Td>
@@ -60,8 +69,9 @@ export function PacientesPage() {
               </Table.Tr>
             ))}
           </Table.Tbody>
-        </Table>
-      )}
+        )}
+      </Table>
+      <ListPagination page={page} totalPages={totalPages} onChange={setPage} />
     </>
   );
 }

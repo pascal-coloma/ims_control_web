@@ -7,6 +7,7 @@ import {
   Loader,
   MultiSelect,
   ScrollArea,
+  Skeleton,
   Stack,
   Table,
   Text,
@@ -18,7 +19,12 @@ import { IconRefresh } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { Link } from "react-router-dom";
 import { streamLogs } from "../../api/logs";
+import { ListPagination } from "../../components/ListPagination";
+import { TableSkeleton } from "../../components/TableSkeleton";
+import { usePagedData } from "../../hooks/usePagedData";
 import type { LogEntry, LogTipo } from "../../types/api";
+
+const COLUMN_COUNT = 6;
 
 const TIPO_OPTIONS: { value: LogTipo; label: string }[] = [
   { value: "atencion", label: "Atención" },
@@ -101,7 +107,9 @@ function AuditLogFeed({ tipos, search }: AuditLogFeedProps) {
         if (!controller.signal.aborted)
           console.error("Error al transmitir logs", err);
       })
-      .finally(() => setStreaming(false));
+      .finally(() => {
+        if (!controller.signal.aborted) setStreaming(false);
+      });
     return () => controller.abort();
   }, []);
 
@@ -118,9 +126,17 @@ function AuditLogFeed({ tipos, search }: AuditLogFeedProps) {
     return result.slice().reverse();
   }, [entries, tipos, search]);
 
+  const { page, setPage, totalPages, pageItems } = usePagedData(filtered);
+
+  useEffect(() => setPage(1), [tipos, search, setPage]);
+
+  const initialLoad = streaming && entries.length === 0;
+
   return (
     <Stack gap="md">
-      {streaming ? (
+      {initialLoad ? (
+        <Skeleton height={12} width={120} radius="sm" />
+      ) : streaming ? (
         <Group gap={6}>
           <Loader size="xs" />
           <Text size="xs" c="dimmed">
@@ -145,48 +161,53 @@ function AuditLogFeed({ tipos, search }: AuditLogFeedProps) {
               <Table.Th>Atención</Table.Th>
             </Table.Tr>
           </Table.Thead>
-          <Table.Tbody>
-            {filtered.map((e) => (
-              <Table.Tr key={e.id}>
-                <Table.Td>{e.id}</Table.Td>
-                <Table.Td>
-                  <Badge color={TIPO_COLOR[e.tipo]} variant="light">
-                    {e.tipo}
-                  </Badge>
-                </Table.Td>
-                <Table.Td>{e.descripcion}</Table.Td>
-                <Table.Td>{e.rut}</Table.Td>
-                <Table.Td>
-                  {e.created_at
-                    ? dayjs(e.created_at).format("DD/MM/YYYY HH:mm")
-                    : "—"}
-                </Table.Td>
-                <Table.Td>
-                  {e.atencion_id !== null ? (
-                    <Anchor
-                      component={Link}
-                      to={`/atenciones/${e.atencion_id}`}
-                    >
-                      #{e.atencion_id}
-                    </Anchor>
-                  ) : (
-                    "—"
-                  )}
-                </Table.Td>
-              </Table.Tr>
-            ))}
-            {filtered.length === 0 && !streaming && (
-              <Table.Tr>
-                <Table.Td colSpan={6}>
-                  <Text c="dimmed" ta="center">
-                    Sin registros
-                  </Text>
-                </Table.Td>
-              </Table.Tr>
-            )}
-          </Table.Tbody>
+          {initialLoad ? (
+            <TableSkeleton columns={COLUMN_COUNT} />
+          ) : (
+            <Table.Tbody>
+              {pageItems.map((e) => (
+                <Table.Tr key={e.id}>
+                  <Table.Td>{e.id}</Table.Td>
+                  <Table.Td>
+                    <Badge color={TIPO_COLOR[e.tipo]} variant="light">
+                      {e.tipo}
+                    </Badge>
+                  </Table.Td>
+                  <Table.Td>{e.descripcion}</Table.Td>
+                  <Table.Td>{e.rut}</Table.Td>
+                  <Table.Td>
+                    {e.created_at
+                      ? dayjs(e.created_at).format("DD/MM/YYYY HH:mm")
+                      : "—"}
+                  </Table.Td>
+                  <Table.Td>
+                    {e.atencion_id !== null ? (
+                      <Anchor
+                        component={Link}
+                        to={`/atenciones/${e.atencion_id}`}
+                      >
+                        #{e.atencion_id}
+                      </Anchor>
+                    ) : (
+                      "—"
+                    )}
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+              {filtered.length === 0 && !streaming && (
+                <Table.Tr>
+                  <Table.Td colSpan={COLUMN_COUNT}>
+                    <Text c="dimmed" ta="center">
+                      Sin registros
+                    </Text>
+                  </Table.Td>
+                </Table.Tr>
+              )}
+            </Table.Tbody>
+          )}
         </Table>
       </ScrollArea.Autosize>
+      <ListPagination page={page} totalPages={totalPages} onChange={setPage} />
     </Stack>
   );
 }

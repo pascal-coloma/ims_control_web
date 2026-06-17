@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Anchor,
   Badge,
@@ -15,8 +15,13 @@ import dayjs from "dayjs";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getAtenciones } from "../../api/atenciones";
 import { queryKeys } from "../../api/queryKeys";
+import { ListPagination } from "../../components/ListPagination";
+import { TableSkeleton } from "../../components/TableSkeleton";
+import { usePagedData } from "../../hooks/usePagedData";
 import type { EstadoSello } from "../../types/api";
 import { AtencionDetailDrawer } from "./components/AtencionDetailDrawer";
+
+const COLUMN_COUNT = 6;
 
 const SELLO_COLOR: Record<EstadoSello, string> = {
   Pendiente: "yellow",
@@ -53,6 +58,10 @@ export function AtencionesPage() {
       return nombre.includes(term) || rut.includes(term);
     });
   }, [atenciones.data, sello, search]);
+
+  const { page, setPage, totalPages, pageItems } = usePagedData(filtered);
+
+  useEffect(() => setPage(1), [sello, search, setPage]);
 
   const selected = useMemo(
     () =>
@@ -92,56 +101,63 @@ export function AtencionesPage() {
             <Table.Th>Despacho</Table.Th>
           </Table.Tr>
         </Table.Thead>
-        <Table.Tbody>
-          {filtered.map((a) => (
-            <Table.Tr
-              key={a.atencion_id}
-              onClick={() => navigate(`/atenciones/${a.atencion_id}`)}
-              style={{ cursor: "pointer" }}
-            >
-              <Table.Td>#{a.atencion_id}</Table.Td>
-              <Table.Td>
-                {a.despacho?.paciente
-                  ? `${a.despacho.paciente.nombre} (${a.despacho.paciente.rut})`
-                  : "—"}
-              </Table.Td>
-              <Table.Td>{dayjs(a.hora_salida).format("DD/MM HH:mm")}</Table.Td>
-              <Table.Td>
-                {a.hora_llegada
-                  ? dayjs(a.hora_llegada).format("DD/MM HH:mm")
-                  : "—"}
-              </Table.Td>
-              <Table.Td>
-                <Badge color={SELLO_COLOR[a.estado_sello]} variant="light">
-                  {a.estado_sello}
-                </Badge>
-              </Table.Td>
-              <Table.Td>
-                {a.despacho ? (
-                  <Anchor
-                    component={Link}
-                    to={`/despachos/${a.despacho.despacho_id}`}
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    #{a.despacho.despacho_id}
-                  </Anchor>
-                ) : (
-                  "—"
-                )}
-              </Table.Td>
-            </Table.Tr>
-          ))}
-          {filtered.length === 0 && (
-            <Table.Tr>
-              <Table.Td colSpan={6}>
-                <Text c="dimmed" ta="center">
-                  Sin registros
-                </Text>
-              </Table.Td>
-            </Table.Tr>
-          )}
-        </Table.Tbody>
+        {atenciones.isLoading ? (
+          <TableSkeleton columns={COLUMN_COUNT} />
+        ) : (
+          <Table.Tbody>
+            {pageItems.map((a) => (
+              <Table.Tr
+                key={a.atencion_id}
+                onClick={() => navigate(`/atenciones/${a.atencion_id}`)}
+                style={{ cursor: "pointer" }}
+              >
+                <Table.Td>#{a.atencion_id}</Table.Td>
+                <Table.Td>
+                  {a.despacho?.paciente
+                    ? `${a.despacho.paciente.nombre} (${a.despacho.paciente.rut})`
+                    : "—"}
+                </Table.Td>
+                <Table.Td>
+                  {dayjs(a.hora_salida).format("DD/MM HH:mm")}
+                </Table.Td>
+                <Table.Td>
+                  {a.hora_llegada
+                    ? dayjs(a.hora_llegada).format("DD/MM HH:mm")
+                    : "—"}
+                </Table.Td>
+                <Table.Td>
+                  <Badge color={SELLO_COLOR[a.estado_sello]} variant="light">
+                    {a.estado_sello}
+                  </Badge>
+                </Table.Td>
+                <Table.Td>
+                  {a.despacho ? (
+                    <Anchor
+                      component={Link}
+                      to={`/despachos/${a.despacho.despacho_id}`}
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      #{a.despacho.despacho_id}
+                    </Anchor>
+                  ) : (
+                    "—"
+                  )}
+                </Table.Td>
+              </Table.Tr>
+            ))}
+            {filtered.length === 0 && (
+              <Table.Tr>
+                <Table.Td colSpan={COLUMN_COUNT}>
+                  <Text c="dimmed" ta="center">
+                    Sin registros
+                  </Text>
+                </Table.Td>
+              </Table.Tr>
+            )}
+          </Table.Tbody>
+        )}
       </Table>
+      <ListPagination page={page} totalPages={totalPages} onChange={setPage} />
 
       {selected && (
         <AtencionDetailDrawer

@@ -1,11 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Badge,
   Button,
   Card,
   Group,
   List,
-  Loader,
   Select,
   SimpleGrid,
   Text,
@@ -15,6 +14,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { getAmbulancias } from "../../../api/ambulancias";
 import { queryKeys } from "../../../api/queryKeys";
+import { CardSkeleton } from "../../../components/CardSkeleton";
+import { ListPagination } from "../../../components/ListPagination";
+import { usePagedData } from "../../../hooks/usePagedData";
 import type { AmbulanciaEstado } from "../../../types/api";
 import { BODEGA_PATENTE } from "../constants";
 
@@ -52,7 +54,9 @@ export function AmbulanceGrid() {
     });
   }, [ambulancias.data, search, estadoFilter]);
 
-  if (ambulancias.isLoading) return <Loader />;
+  const { page, setPage, totalPages, pageItems } = usePagedData(rows);
+
+  useEffect(() => setPage(1), [search, estadoFilter, setPage]);
 
   return (
     <>
@@ -75,48 +79,57 @@ export function AmbulanceGrid() {
         />
       </Group>
 
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-        {rows.map((amb) => (
-          <Card key={amb.ambulancia_id} withBorder>
-            <Group justify="space-between" mb="xs">
-              <Text fw={700}>{amb.patente}</Text>
-              <Badge color={ESTADO_COLOR[amb.estado]} variant="light">
-                {amb.estado}
-              </Badge>
-            </Group>
-            <List size="sm" mb="sm">
-              {amb.stock.slice(0, 5).map((item) => (
-                <List.Item key={item.presentacion_id}>
-                  {item.insumo_nombre}: {item.stock} {item.unidad_medida}
-                </List.Item>
-              ))}
-              {amb.stock.length === 0 && (
-                <Text size="sm" c="dimmed">
-                  Sin stock registrado
-                </Text>
-              )}
-              {amb.stock.length > 5 && (
-                <Text size="xs" c="dimmed">
-                  +{amb.stock.length - 5} más
-                </Text>
-              )}
-            </List>
-            <Button
-              size="xs"
-              variant="light"
-              onClick={() => navigate(`/flota/${amb.ambulancia_id}`)}
-            >
-              Ver detalle
-            </Button>
-          </Card>
-        ))}
-      </SimpleGrid>
+      {ambulancias.isLoading ? (
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <CardSkeleton key={i} lines={4} />
+          ))}
+        </SimpleGrid>
+      ) : (
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+          {pageItems.map((amb, i) => (
+            <Card key={i} withBorder>
+              <Group justify="space-between" mb="xs">
+                <Text fw={700}>{amb.patente}</Text>
+                <Badge color={ESTADO_COLOR[amb.estado]} variant="light">
+                  {amb.estado}
+                </Badge>
+              </Group>
+              <List size="sm" mb="sm">
+                {amb.stock.slice(0, 5).map((item, i) => (
+                  <List.Item key={i}>
+                    {item.insumo_nombre}: {item.stock} {item.unidad_medida}
+                  </List.Item>
+                ))}
+                {amb.stock.length === 0 && (
+                  <Text size="sm" c="dimmed">
+                    Sin stock registrado
+                  </Text>
+                )}
+                {amb.stock.length > 5 && (
+                  <Text size="xs" c="dimmed">
+                    +{amb.stock.length - 5} más
+                  </Text>
+                )}
+              </List>
+              <Button
+                size="xs"
+                variant="light"
+                onClick={() => navigate(`/flota/${amb.ambulancia_id}`)}
+              >
+                Ver detalle
+              </Button>
+            </Card>
+          ))}
+        </SimpleGrid>
+      )}
 
-      {rows.length === 0 && (
+      {!ambulancias.isLoading && rows.length === 0 && (
         <Text c="dimmed" ta="center" mt="md">
           Sin resultados
         </Text>
       )}
+      <ListPagination page={page} totalPages={totalPages} onChange={setPage} />
     </>
   );
 }

@@ -4,7 +4,6 @@ import {
   Badge,
   Button,
   Group,
-  Loader,
   Modal,
   Stack,
   Text,
@@ -15,9 +14,14 @@ import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deletePersonal, getPersonal } from "../../api/personal";
 import { queryKeys } from "../../api/queryKeys";
+import { ListPagination } from "../../components/ListPagination";
+import { TableSkeleton } from "../../components/TableSkeleton";
+import { usePagedData } from "../../hooks/usePagedData";
 import type { AddStaffResponse, PersonalListItem } from "../../types/api";
 import { AddStaffModal } from "./components/AddStaffModal";
 import { ProvisioningResultModal } from "./components/ProvisioningResultModal";
+
+const COLUMN_COUNT = 5;
 
 export function PersonalPage() {
   const queryClient = useQueryClient();
@@ -31,6 +35,8 @@ export function PersonalPage() {
     queryKey: queryKeys.personal.list(),
     queryFn: getPersonal,
   });
+
+  const { page, setPage, totalPages, pageItems } = usePagedData(data ?? []);
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deletePersonal(id),
@@ -62,21 +68,21 @@ export function PersonalPage() {
         </Button>
       </Group>
 
-      {isLoading ? (
-        <Loader />
-      ) : (
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Nombre</Table.Th>
-              <Table.Th>RUT</Table.Th>
-              <Table.Th>Rol</Table.Th>
-              <Table.Th>Estado</Table.Th>
-              <Table.Th />
-            </Table.Tr>
-          </Table.Thead>
+      <Table striped highlightOnHover>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Nombre</Table.Th>
+            <Table.Th>RUT</Table.Th>
+            <Table.Th>Rol</Table.Th>
+            <Table.Th>Estado</Table.Th>
+            <Table.Th />
+          </Table.Tr>
+        </Table.Thead>
+        {isLoading ? (
+          <TableSkeleton columns={COLUMN_COUNT} />
+        ) : (
           <Table.Tbody>
-            {(data ?? []).map((person) => (
+            {pageItems.map((person) => (
               <Table.Tr key={person.id}>
                 <Table.Td>
                   {person.first_name} {person.last_name}
@@ -103,8 +109,9 @@ export function PersonalPage() {
               </Table.Tr>
             ))}
           </Table.Tbody>
-        </Table>
-      )}
+        )}
+      </Table>
+      <ListPagination page={page} totalPages={totalPages} onChange={setPage} />
 
       <AddStaffModal
         opened={addOpen}
