@@ -5,6 +5,13 @@ export function getGrupos(): Promise<Grupo[]> {
   return get<Grupo[]>("/ims/api/grupo/");
 }
 
+export function toGrupoOptions(grupos: Grupo[]) {
+  return grupos.map((g) => ({
+    value: String(g.grupo_id),
+    label: `${g.grupo_nombre} (${g.miembros.length} miembros)`,
+  }));
+}
+
 export function getGrupo(groupId: number): Promise<Grupo[]> {
   return get<Grupo[]>(`/ims/api/grupo/?group_id=${groupId}`);
 }

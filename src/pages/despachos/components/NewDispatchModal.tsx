@@ -18,7 +18,7 @@ import {
   asignarDespacho,
   programarDespacho,
 } from "../../../api/despachos";
-import { getGrupos } from "../../../api/grupos";
+import { getGrupos, toGrupoOptions } from "../../../api/grupos";
 import { queryKeys } from "../../../api/queryKeys";
 import { PatientLookupOrRegister } from "../../../components/patients/PatientLookupOrRegister";
 import type { Paciente } from "../../../types/api";
@@ -60,11 +60,7 @@ export function NewDispatchModal({ opened, onClose }: NewDispatchModalProps) {
   );
 
   const grupoOptions = useMemo(
-    () =>
-      (grupos.data ?? []).map((g) => ({
-        value: String(g.grupo_id),
-        label: `${g.grupo_nombre} (${g.miembros.length} miembros)`,
-      })),
+    () => toGrupoOptions(grupos.data ?? []),
     [grupos.data],
   );
 

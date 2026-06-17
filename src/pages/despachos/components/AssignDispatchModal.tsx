@@ -13,7 +13,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAmbulancias } from "../../../api/ambulancias";
 import { asignarDespacho } from "../../../api/despachos";
 import { ApiError } from "../../../api/client";
-import { getGrupos } from "../../../api/grupos";
+import { getGrupos, toGrupoOptions } from "../../../api/grupos";
 import { queryKeys } from "../../../api/queryKeys";
 
 interface AssignDispatchModalProps {
@@ -57,11 +57,7 @@ export function AssignDispatchModal({
   }, [ambulancias.data, showAllAmbulances]);
 
   const grupoOptions = useMemo(
-    () =>
-      (grupos.data ?? []).map((g) => ({
-        value: String(g.grupo_id),
-        label: `${g.grupo_nombre} (${g.miembros.length} miembros)`,
-      })),
+    () => toGrupoOptions(grupos.data ?? []),
     [grupos.data],
   );
 

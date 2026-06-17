@@ -3,7 +3,7 @@ import { Button, Group, Modal, Select, Stack } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { programarDespacho } from "../../../api/despachos";
-import { getGrupos } from "../../../api/grupos";
+import { getGrupos, toGrupoOptions } from "../../../api/grupos";
 import { queryKeys } from "../../../api/queryKeys";
 
 interface ScheduleDispatchModalProps {
@@ -28,11 +28,7 @@ export function ScheduleDispatchModal({
   });
 
   const grupoOptions = useMemo(
-    () =>
-      (grupos.data ?? []).map((g) => ({
-        value: String(g.grupo_id),
-        label: `${g.grupo_nombre} (${g.miembros.length} miembros)`,
-      })),
+    () => toGrupoOptions(grupos.data ?? []),
     [grupos.data],
   );
 
