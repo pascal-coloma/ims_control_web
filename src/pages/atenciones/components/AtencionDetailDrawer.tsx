@@ -22,16 +22,8 @@ import {
   getFhirBundle,
 } from "../../../api/atenciones";
 import { generatePDF } from "../../../utils/pdf";
-import type {
-  AtencionListItem,
-  DocumentoAtencion,
-  EstadoSello,
-} from "../../../types/api";
-
-const SELLO_COLOR: Record<EstadoSello, string> = {
-  Pendiente: "yellow",
-  Firmado: "green",
-};
+import type { AtencionListItem, DocumentoAtencion } from "../../../types/api";
+import { SELLO_COLOR } from "../constants";
 
 interface AtencionDetailDrawerProps {
   atencion: AtencionListItem;

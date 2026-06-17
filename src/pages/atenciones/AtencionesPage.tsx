@@ -18,15 +18,10 @@ import { queryKeys } from "../../api/queryKeys";
 import { ListPagination } from "../../components/ListPagination";
 import { TableSkeleton } from "../../components/TableSkeleton";
 import { usePagedData } from "../../hooks/usePagedData";
-import type { EstadoSello } from "../../types/api";
 import { AtencionDetailDrawer } from "./components/AtencionDetailDrawer";
+import { SELLO_COLOR } from "./constants";
 
 const COLUMN_COUNT = 6;
-
-const SELLO_COLOR: Record<EstadoSello, string> = {
-  Pendiente: "yellow",
-  Firmado: "green",
-};
 
 const SELLO_OPTIONS = [
   { value: "todos", label: "Todos" },
