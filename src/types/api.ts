@@ -6,6 +6,16 @@ export interface AuthUser {
   last_name: string;
 }
 
+// --- Notificaciones (FCM) ---
+
+export interface AppNotification {
+  id: string;
+  title: string;
+  body: string;
+  read: boolean;
+  receivedAt: Date;
+}
+
 // --- Personal ---
 
 export interface PersonalListItem {
