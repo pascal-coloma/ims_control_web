@@ -32,3 +32,5 @@ deploy_key*
 *.njsproj
 *.sln
 *.sw?
+.claude/worktrees
+.claude/worktrees/ponytail-audit-fixes
