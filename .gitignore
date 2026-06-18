@@ -34,3 +34,6 @@ deploy_key*
 *.sw?
 .claude/worktrees
 .claude/worktrees/ponytail-audit-fixes
+
+# Generated from public/firebase-messaging-sw.template.js (scripts/generate-sw.mjs)
+public/firebase-messaging-sw.js
