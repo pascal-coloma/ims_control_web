@@ -1,39 +1,33 @@
+import { get } from "./client";
 import type { LogEntry } from "../types/api";
 
-/**
- * Consumes the NDJSON-streamed audit log feed, calling `onEntry` for each
- * complete JSON line as it arrives. Resolves once the stream ends, or
- * rejects if `signal` aborts it first.
- */
-export async function streamLogs(
-  onEntry: (entry: LogEntry) => void,
+export const LOGS_URL = "/ims/api/logs/";
+
+export interface LogsPage {
+  next: string | null;
+  previous: string | null;
+  results: LogEntry[];
+}
+
+// DRF builds next/previous as absolute URLs from the request it sees, which
+// behind the dev/prod proxy is the backend's own host — fetching that
+// directly from the browser skips the proxy and trips CORS. Strip it back
+// down to a path so it's re-fetched through the same origin as everything else.
+function toRelative(url: string | null): string | null {
+  if (!url) return null;
+  const { pathname, search } = new URL(url, window.location.origin);
+  return `${pathname}${search}`;
+}
+
+/** Fetches one page of the cursor-paginated GET /ims/api/logs/ feed. */
+export async function getLogsPage(
+  url: string = LOGS_URL,
   signal?: AbortSignal,
-): Promise<void> {
-  const response = await fetch("/ims/api/logs/", {
-    credentials: "include",
-    signal,
-  });
-  if (!response.ok || !response.body) {
-    throw new Error(`Failed to open audit log stream (${response.status})`);
-  }
-
-  const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
-  let buffer = "";
-
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buffer += value;
-
-    let newlineIndex = buffer.indexOf("\n");
-    while (newlineIndex !== -1) {
-      const line = buffer.slice(0, newlineIndex).trim();
-      buffer = buffer.slice(newlineIndex + 1);
-      if (line) onEntry(JSON.parse(line) as LogEntry);
-      newlineIndex = buffer.indexOf("\n");
-    }
-  }
-
-  const trailing = buffer.trim();
-  if (trailing) onEntry(JSON.parse(trailing) as LogEntry);
+): Promise<LogsPage> {
+  const page = await get<LogsPage>(url, signal);
+  return {
+    ...page,
+    next: toRelative(page.next),
+    previous: toRelative(page.previous),
+  };
 }

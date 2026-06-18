@@ -212,9 +212,9 @@ export interface LogEntry {
   tipo: LogTipo;
   atencion_id: number | null;
   usuario: number;
-  rut: string;
+  rut_usuario: string;
   descripcion: string;
-  created_at: string | null;
+  timestamp: string;
 }
 
 // --- Documento Atención (firmado, S3) ---

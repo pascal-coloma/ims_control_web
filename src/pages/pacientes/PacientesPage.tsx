@@ -1,9 +1,11 @@
-import { Card, Table, Title } from "@mantine/core";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getPacientes } from "../../api/pacientes";
+import { Button, Card, Group, Table, Title } from "@mantine/core";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { addPaciente, getPacientes } from "../../api/pacientes";
 import { queryKeys } from "../../api/queryKeys";
 import { ListPagination } from "../../components/ListPagination";
 import { PatientLookupOrRegister } from "../../components/patients/PatientLookupOrRegister";
+import { PatientRegistrationFields } from "../../components/patients/PatientRegistrationFields";
 import { TableSkeleton } from "../../components/TableSkeleton";
 import { usePagedData } from "../../hooks/usePagedData";
 
@@ -11,10 +13,19 @@ const COLUMN_COUNT = 6;
 
 export function PacientesPage() {
   const queryClient = useQueryClient();
+  const [showRegister, setShowRegister] = useState(false);
 
   const pacientes = useQuery({
     queryKey: queryKeys.pacientes.list(),
     queryFn: getPacientes,
+  });
+
+  const register = useMutation({
+    mutationFn: addPaciente,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.pacientes.list() });
+      setShowRegister(false);
+    },
   });
 
   const { page, setPage, totalPages, pageItems } = usePagedData(
@@ -23,9 +34,26 @@ export function PacientesPage() {
 
   return (
     <>
-      <Title order={2} mb="md">
-        Pacientes
-      </Title>
+      <Group justify="space-between" mb="md">
+        <Title order={2}>Pacientes</Title>
+        <Button onClick={() => setShowRegister((v) => !v)}>
+          + Registrar paciente
+        </Button>
+      </Group>
+
+      {showRegister && (
+        <Card withBorder mb="md">
+          <Title order={4} mb="sm">
+            Registrar paciente
+          </Title>
+          <PatientRegistrationFields
+            initialRut=""
+            submitting={register.isPending}
+            onSubmit={(data) => register.mutate(data)}
+            onCancel={() => setShowRegister(false)}
+          />
+        </Card>
+      )}
 
       <Card withBorder mb="md">
         <Title order={4} mb="sm">
