@@ -1,15 +1,23 @@
 import {
+  ActionIcon,
   AppShell,
+  AppShellHeader,
   AppShellMain,
   AppShellNavbar,
   Button,
   Divider,
+  Drawer,
+  Group,
+  Indicator,
   NavLink,
   Stack,
   Text,
+  UnstyledButton,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import {
   IconAmbulance,
+  IconBell,
   IconClipboardText,
   IconHistory,
   IconLogout,
@@ -21,6 +29,8 @@ import {
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { logoutApi } from "../api/auth";
 import { useAuthStore } from "../stores/authStore";
+import { useNotificationStore } from "../stores/notificationStore";
+import { useFcmNotifications } from "../hooks/useFcmNotifications";
 
 const NAV_ITEMS = [
   { to: "/despachos", label: "Despachos", icon: IconAmbulance },
@@ -37,8 +47,43 @@ export function AppLayout() {
   const logout = useAuthStore((state) => state.logout);
   const location = useLocation();
 
+  const notifications = useNotificationStore((state) => state.notifications);
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
+  const dismissNotification = useNotificationStore(
+    (state) => state.dismissNotification,
+  );
+  const markAllRead = useNotificationStore((state) => state.markAllRead);
+  const [notifOpen, { open: openNotif, close: closeNotif }] =
+    useDisclosure(false);
+  useFcmNotifications();
+
   return (
-    <AppShell navbar={{ width: 240, breakpoint: "sm" }} padding="md">
+    <AppShell
+      navbar={{ width: 240, breakpoint: "sm" }}
+      header={{ height: 52 }}
+      padding="md"
+    >
+      <AppShellHeader px="md">
+        <Group h="100%" justify="flex-end">
+          <Indicator
+            label={unreadCount}
+            disabled={unreadCount === 0}
+            size={16}
+            color="red"
+          >
+            <ActionIcon
+              variant="subtle"
+              size="lg"
+              onClick={() => {
+                openNotif();
+                markAllRead();
+              }}
+            >
+              <IconBell size={20} />
+            </ActionIcon>
+          </Indicator>
+        </Group>
+      </AppShellHeader>
       <AppShellNavbar p="md">
         <Stack gap="xs" h="100%" justify="space-between">
           <Stack gap={4}>
@@ -86,6 +131,44 @@ export function AppLayout() {
       <AppShellMain>
         <Outlet />
       </AppShellMain>
+      <Drawer
+        opened={notifOpen}
+        onClose={closeNotif}
+        position="right"
+        title="Notificaciones"
+        size="sm"
+      >
+        {notifications.length === 0 ? (
+          <Text c="dimmed" ta="center" mt="xl">
+            Sin notificaciones
+          </Text>
+        ) : (
+          <Stack gap="xs">
+            {notifications.map((n) => (
+              <UnstyledButton
+                key={n.id}
+                onClick={() => dismissNotification(n.id)}
+              >
+                <Stack
+                  gap={2}
+                  p="xs"
+                  style={{
+                    borderRadius: 8,
+                    backgroundColor: n.read ? undefined : "#eff6ff",
+                  }}
+                >
+                  <Text size="sm" fw={n.read ? 400 : 600}>
+                    {n.title}
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    {n.body}
+                  </Text>
+                </Stack>
+              </UnstyledButton>
+            ))}
+          </Stack>
+        )}
+      </Drawer>
     </AppShell>
   );
 }
