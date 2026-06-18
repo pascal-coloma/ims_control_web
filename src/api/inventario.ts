@@ -1,18 +1,8 @@
 import { get, patch, post } from "./client";
-import type {
-  AddInventarioItem,
-  InventarioDetail,
-  InventarioRow,
-} from "../types/api";
+import type { AddInventarioItem, InventarioRow } from "../types/api";
 
 export function getInventario(): Promise<InventarioRow[]> {
   return get<InventarioRow[]>("/ims/api/inv/");
-}
-
-export function getInventarioByInsumo(
-  insumoId: number,
-): Promise<InventarioDetail> {
-  return get<InventarioDetail>(`/ims/api/inv/?insumo_id=${insumoId}`);
 }
 
 export function addInventario(items: AddInventarioItem[]): Promise<unknown> {

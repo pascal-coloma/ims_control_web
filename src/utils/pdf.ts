@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import type { DocumentoAtencion } from "../types/api";
 
 function formatearHora(hora: string | undefined): string {
@@ -9,14 +10,7 @@ function formatearHora(hora: string | undefined): string {
 
 function formatearFechaHora(iso: string): string {
   if (!iso) return "—";
-  const d = new Date(iso);
-  return d.toLocaleDateString("es-CL", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return dayjs(iso).format("DD/MM/YYYY HH:mm");
 }
 
 /** Builds the signed-document HTML and opens the browser print dialog so it can be saved as PDF. */
