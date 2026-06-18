@@ -160,18 +160,6 @@ export interface InventarioRow {
   };
 }
 
-export interface InventarioDetail {
-  presentacion: {
-    id: number;
-    nombre: string;
-    categoria: string;
-    categoria_id: number;
-    cantidad: number;
-    unidad_medida: string;
-    ambulancia: { patente: string; stock: number };
-  };
-}
-
 export interface AddInventarioItem {
   nombre_insumo: string;
   categoria_id: number;
