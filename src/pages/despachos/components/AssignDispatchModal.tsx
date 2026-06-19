@@ -53,7 +53,9 @@ export function AssignDispatchModal({
       : data.filter((a) => a.estado === ESTADO_DISPONIBLE);
     return filtered.map((a) => ({
       value: String(a.ambulancia_id),
-      label: showAllAmbulances ? `${a.patente} (${ESTADO_LABEL[a.estado]})` : a.patente,
+      label: showAllAmbulances
+        ? `${a.patente} (${ESTADO_LABEL[a.estado]})`
+        : a.patente,
     }));
   }, [ambulancias.data, showAllAmbulances]);
 

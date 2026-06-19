@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ActionIcon,
+  Alert,
   Button,
   Group,
   ScrollArea,
@@ -12,9 +13,10 @@ import {
   Title,
   Tooltip,
 } from "@mantine/core";
-import { IconPlus, IconRefresh } from "@tabler/icons-react";
+import { IconAlertCircle, IconPlus, IconRefresh } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { ApiError } from "../../api/client";
 import { getAmbulancias } from "../../api/ambulancias";
 import { getDespachos } from "../../api/despachos";
 import { queryKeys } from "../../api/queryKeys";
@@ -133,21 +135,57 @@ export function DispatchBoardPage() {
         w={320}
       />
 
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="md">
-        {COLUMNS.map((col) => (
-          <DispatchColumn
-            key={col.estado}
-            label={col.label}
-            items={columns.get(col.estado) ?? []}
-            search={search}
-            ambulanciaPatentes={ambulanciaPatentes}
-            isLoading={despachosQuery.isLoading}
-            onCardClick={(id) => navigate(`/despachos/${id}`)}
-            onAssign={setAssignDispatchId}
-            onSchedule={setScheduleDispatchId}
-          />
-        ))}
-      </SimpleGrid>
+      {ambulanciasQuery.isError && (
+        <Alert
+          color="yellow"
+          variant="light"
+          icon={<IconAlertCircle size={18} />}
+        >
+          No se pudieron cargar las ambulancias — las cards no mostrarán la
+          patente asignada.
+        </Alert>
+      )}
+
+      {despachosQuery.isError ? (
+        <Alert
+          color="red"
+          variant="light"
+          icon={<IconAlertCircle size={18} />}
+          title="No se pudieron cargar los despachos"
+        >
+          <Stack gap="xs">
+            <Text size="sm">
+              {despachosQuery.error instanceof ApiError
+                ? (despachosQuery.error.errorMessage ??
+                  despachosQuery.error.message)
+                : "Error desconocido"}
+            </Text>
+            <Button
+              size="xs"
+              variant="light"
+              onClick={() => despachosQuery.refetch()}
+            >
+              Reintentar
+            </Button>
+          </Stack>
+        </Alert>
+      ) : (
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="md">
+          {COLUMNS.map((col) => (
+            <DispatchColumn
+              key={col.estado}
+              label={col.label}
+              items={columns.get(col.estado) ?? []}
+              search={search}
+              ambulanciaPatentes={ambulanciaPatentes}
+              isLoading={despachosQuery.isLoading}
+              onCardClick={(id) => navigate(`/despachos/${id}`)}
+              onAssign={setAssignDispatchId}
+              onSchedule={setScheduleDispatchId}
+            />
+          ))}
+        </SimpleGrid>
+      )}
 
       <NewDispatchModal
         opened={newDispatchOpen}
@@ -216,7 +254,7 @@ function DispatchColumn({
         <Stack gap="xs">
           {isLoading
             ? Array.from({ length: 3 }).map((_, i) => (
-                <CardSkeleton key={i} lines={3} />
+                <CardSkeleton key={i} lines={5} />
               ))
             : pageItems.map((despacho) => (
                 <DispatchCard

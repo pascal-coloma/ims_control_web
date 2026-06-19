@@ -13,7 +13,11 @@ import { getAmbulancias } from "../../api/ambulancias";
 import { queryKeys } from "../../api/queryKeys";
 import { ListPagination } from "../../components/ListPagination";
 import { TableSkeleton } from "../../components/TableSkeleton";
-import { BODEGA_PATENTE, ESTADO_COLOR, ESTADO_LABEL } from "../../constants/ambulancia";
+import {
+  BODEGA_PATENTE,
+  ESTADO_COLOR,
+  ESTADO_LABEL,
+} from "../../constants/ambulancia";
 import { usePagedData } from "../../hooks/usePagedData";
 import type { AmbulanciaEstado } from "../../types/api";
 

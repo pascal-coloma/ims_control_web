@@ -42,8 +42,12 @@ export function useFcmNotifications(): void {
           });
           // El payload no trae un "tipo" estructurado (ver task_notificaciones.py),
           // así que no podemos saber si afecta ambulancias o despachos: invalidamos ambas.
-          queryClient.invalidateQueries({ queryKey: queryKeys.ambulancias.list() });
-          queryClient.invalidateQueries({ queryKey: queryKeys.despachos.list() });
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.ambulancias.list(),
+          });
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.despachos.list(),
+          });
         });
       } catch (err) {
         console.error("FCM setup failed", err);

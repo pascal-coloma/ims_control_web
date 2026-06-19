@@ -1,16 +1,19 @@
 import {
+  Alert,
   Badge,
   Button,
   Divider,
   Drawer,
   Group,
   List,
-  Loader,
+  Skeleton,
   Stack,
   Text,
 } from "@mantine/core";
+import { IconAlertCircle } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { ApiError } from "../../../api/client";
 import { getDespacho } from "../../../api/despachos";
 import { queryKeys } from "../../../api/queryKeys";
 
@@ -22,6 +25,24 @@ interface DispatchDetailDrawerProps {
   onSchedule: () => void;
 }
 
+/** Placeholder con la forma real del detalle (badge + líneas + lista), mostrado mientras carga. */
+function DetailSkeleton() {
+  return (
+    <Stack gap="sm">
+      <Group>
+        <Skeleton height={14} width={50} radius="sm" />
+        <Skeleton height={20} width={80} radius="sm" />
+      </Group>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Skeleton key={i} height={12} width={`${85 - i * 8}%`} radius="sm" />
+      ))}
+      <Divider />
+      <Skeleton height={12} width="60%" radius="sm" />
+      <Skeleton height={12} width="55%" radius="sm" />
+    </Stack>
+  );
+}
+
 export function DispatchDetailDrawer({
   despachoId,
   opened,
@@ -29,7 +50,7 @@ export function DispatchDetailDrawer({
   onAssign,
   onSchedule,
 }: DispatchDetailDrawerProps) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: queryKeys.despachos.detail(despachoId),
     queryFn: () => getDespacho(despachoId),
     enabled: opened,
@@ -45,10 +66,26 @@ export function DispatchDetailDrawer({
       position="right"
       size="md"
     >
-      {isLoading || !despacho ? (
-        <Group justify="center" mt="xl">
-          <Loader />
-        </Group>
+      {isError ? (
+        <Alert
+          color="red"
+          variant="light"
+          icon={<IconAlertCircle size={18} />}
+          title="No se pudo cargar el despacho"
+        >
+          <Stack gap="xs">
+            <Text size="sm">
+              {error instanceof ApiError
+                ? (error.errorMessage ?? error.message)
+                : "Error desconocido"}
+            </Text>
+            <Button size="xs" variant="light" onClick={() => refetch()}>
+              Reintentar
+            </Button>
+          </Stack>
+        </Alert>
+      ) : isLoading || !despacho ? (
+        <DetailSkeleton />
       ) : (
         <Stack gap="sm">
           <Group>
@@ -119,11 +156,9 @@ export function DispatchDetailDrawer({
               <Divider label="Personal asignado" />
               <List size="sm">
                 {despacho.personal.map((p) => (
-                  <List.Item key={p.personal__id}>
-                    {p.personal__first_name} {p.personal__last_name}
-                    {p.personal__rol__nombre_rol
-                      ? ` — ${p.personal__rol__nombre_rol}`
-                      : ""}
+                  <List.Item key={p.id}>
+                    {p.first_name} {p.last_name}
+                    {p.rol ? ` — ${p.rol}` : ""}
                   </List.Item>
                 ))}
               </List>

@@ -18,7 +18,11 @@ import { CardSkeleton } from "../../../components/CardSkeleton";
 import { ListPagination } from "../../../components/ListPagination";
 import { usePagedData } from "../../../hooks/usePagedData";
 import type { AmbulanciaEstado } from "../../../types/api";
-import { BODEGA_PATENTE, ESTADO_COLOR, ESTADO_LABEL } from "../../../constants/ambulancia";
+import {
+  BODEGA_PATENTE,
+  ESTADO_COLOR,
+  ESTADO_LABEL,
+} from "../../../constants/ambulancia";
 
 const POLL_INTERVAL_MS = 120_000;
 

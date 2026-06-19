@@ -83,11 +83,11 @@ export type DespachoEstado =
   | "emergencia";
 
 export interface DespachoPersonal {
-  personal__id: number;
-  personal__first_name: string;
-  personal__last_name: string;
-  personal__rut: string;
-  personal__rol__nombre_rol: string | null;
+  id: number;
+  first_name: string;
+  last_name: string;
+  rut: string;
+  rol: string | null;
 }
 
 export interface Despacho {
@@ -99,11 +99,18 @@ export interface Despacho {
   fecha_llamado: string;
   fecha_asignacion: string | null;
   fecha_programada?: string | null;
+  fecha_finalizacion?: string | null;
   ambulancia_id: number | null;
   paciente: { nombre_completo: string; rut: string } | null;
   personal: DespachoPersonal[];
   creado_por_id?: number;
   asignado_por_id?: number;
+}
+
+export interface CursorPage<T> {
+  next: string | null;
+  previous: string | null;
+  results: T[];
 }
 
 export interface AddDespachoResponse {

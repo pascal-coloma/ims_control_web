@@ -2,7 +2,8 @@ import type { AmbulanciaEstado } from "../types/api";
 
 export const BODEGA_PATENTE = "BODEGA";
 
-export const ESTADO_DISPONIBLE: AmbulanciaEstado = "Lista para un nuevo despacho";
+export const ESTADO_DISPONIBLE: AmbulanciaEstado =
+  "Lista para un nuevo despacho";
 
 export const ESTADO_COLOR: Record<AmbulanciaEstado, string> = {
   "Lista para un nuevo despacho": "green",

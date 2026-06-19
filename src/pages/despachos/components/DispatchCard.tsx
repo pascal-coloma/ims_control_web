@@ -28,7 +28,7 @@ export function DispatchCard({
   onSchedule,
 }: DispatchCardProps) {
   const equipo = despacho.personal
-    .map((p) => `${p.personal__first_name} ${p.personal__last_name}`)
+    .map((p) => `${p.first_name} ${p.last_name}`)
     .join(", ");
 
   return (
