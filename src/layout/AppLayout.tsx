@@ -62,10 +62,10 @@ export function AppLayout() {
   return (
     <AppShell
       navbar={{ width: 240, breakpoint: "sm" }}
-      header={{ height: 52 }}
+      header={{ height: 64 }}
       padding="md"
     >
-      <AppShellHeader px="md">
+      <AppShellHeader px="md" py="sm">
         <Group h="100%" justify="flex-end">
           <Indicator
             label={unreadCount}
