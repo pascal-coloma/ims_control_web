@@ -11,7 +11,7 @@ import { IconArrowLeft } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { getAmbulancias } from "../../../api/ambulancias";
 import { queryKeys } from "../../../api/queryKeys";
-import { ESTADO_COLOR } from "../constants";
+import { ESTADO_COLOR } from "../../../constants/ambulancia";
 import { InventoryTable } from "./InventoryTable";
 
 interface AmbulanceDetailProps {
@@ -42,7 +42,7 @@ export function AmbulanceDetail({
           variant="subtle"
           onClick={onBack}
         >
-          Volver a la flota
+          Volver al inventario
         </Button>
         {ambulancia && (
           <>

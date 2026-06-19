@@ -1,72 +1,110 @@
-import { useState } from "react";
-import { Button, Group, Tabs, Title } from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { AddSuppliesModal } from "./components/AddSuppliesModal";
-import { AmbulanceDetail } from "./components/AmbulanceDetail";
-import { AmbulanceGrid } from "./components/AmbulanceGrid";
-import { InventoryTable } from "./components/InventoryTable";
-import { BODEGA_PATENTE } from "./constants";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Badge,
+  Group,
+  Select,
+  Table,
+  Text,
+  TextInput,
+  Title,
+} from "@mantine/core";
+import { useQuery } from "@tanstack/react-query";
+import { getAmbulancias } from "../../api/ambulancias";
+import { queryKeys } from "../../api/queryKeys";
+import { ListPagination } from "../../components/ListPagination";
+import { TableSkeleton } from "../../components/TableSkeleton";
+import { BODEGA_PATENTE, ESTADO_COLOR } from "../../constants/ambulancia";
+import { usePagedData } from "../../hooks/usePagedData";
+import type { AmbulanciaEstado } from "../../types/api";
+
+const COLUMN_COUNT = 2;
+
+const ESTADO_OPTIONS: { value: AmbulanciaEstado; label: string }[] = [
+  { value: "disponible", label: "Disponible" },
+  { value: "en_despacho", label: "En despacho" },
+  { value: "mantencion", label: "Mantención" },
+  { value: "fuera_servicio", label: "Fuera de servicio" },
+];
 
 export function FlotaPage() {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [estadoFilter, setEstadoFilter] = useState<string | null>(null);
 
-  const tabParam = searchParams.get("tab");
-  const tab =
-    tabParam === "ambulancias" || tabParam === "global" ? tabParam : "bodega";
+  const ambulancias = useQuery({
+    queryKey: queryKeys.ambulancias.list(),
+    queryFn: getAmbulancias,
+  });
 
-  function handleTabChange(value: string | null) {
-    setSearchParams(value && value !== "bodega" ? { tab: value } : {});
-  }
+  const rows = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return (ambulancias.data ?? []).filter((amb) => {
+      if (amb.patente === BODEGA_PATENTE) return false;
+      if (estadoFilter && amb.estado !== estadoFilter) return false;
+      if (term && !amb.patente.toLowerCase().includes(term)) return false;
+      return true;
+    });
+  }, [ambulancias.data, search, estadoFilter]);
 
-  if (id) {
-    return (
-      <AmbulanceDetail
-        ambulanciaId={Number(id)}
-        onBack={() => navigate("/flota")}
-      />
-    );
-  }
+  const { page, setPage, totalPages, pageItems } = usePagedData(rows);
+
+  useEffect(() => setPage(1), [search, estadoFilter, setPage]);
 
   return (
     <>
-      <Group justify="space-between" mb="md">
-        <Title order={2}>Flota & Inventario</Title>
-        <Button
-          leftSection={<IconPlus size={16} />}
-          onClick={() => setAddModalOpen(true)}
-        >
-          Agregar insumos
-        </Button>
+      <Title order={2} mb="md">
+        Flota
+      </Title>
+
+      <Group align="flex-end" mb="md">
+        <TextInput
+          label="Patente"
+          placeholder="Buscar patente"
+          value={search}
+          onChange={(event) => setSearch(event.currentTarget.value)}
+          w={220}
+        />
+        <Select
+          label="Estado"
+          placeholder="Todos"
+          data={ESTADO_OPTIONS}
+          value={estadoFilter}
+          onChange={setEstadoFilter}
+          clearable
+          w={200}
+        />
       </Group>
 
-      <Tabs value={tab} onChange={handleTabChange}>
-        <Tabs.List mb="md">
-          <Tabs.Tab value="bodega">Bodega</Tabs.Tab>
-          <Tabs.Tab value="ambulancias">Por Ambulancia</Tabs.Tab>
-          <Tabs.Tab value="global">Global</Tabs.Tab>
-        </Tabs.List>
+      <Table striped highlightOnHover>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Patente</Table.Th>
+            <Table.Th>Estado</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        {ambulancias.isLoading ? (
+          <TableSkeleton columns={COLUMN_COUNT} />
+        ) : (
+          <Table.Tbody>
+            {pageItems.map((amb) => (
+              <Table.Tr key={amb.ambulancia_id}>
+                <Table.Td>{amb.patente}</Table.Td>
+                <Table.Td>
+                  <Badge color={ESTADO_COLOR[amb.estado]} variant="light">
+                    {amb.estado}
+                  </Badge>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        )}
+      </Table>
 
-        <Tabs.Panel value="bodega">
-          <InventoryTable lockedAmbulanciaPatente={BODEGA_PATENTE} />
-        </Tabs.Panel>
-
-        <Tabs.Panel value="ambulancias">
-          <AmbulanceGrid />
-        </Tabs.Panel>
-
-        <Tabs.Panel value="global">
-          <InventoryTable />
-        </Tabs.Panel>
-      </Tabs>
-
-      <AddSuppliesModal
-        opened={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
-      />
+      {!ambulancias.isLoading && rows.length === 0 && (
+        <Text c="dimmed" ta="center" mt="md">
+          Sin resultados
+        </Text>
+      )}
+      <ListPagination page={page} totalPages={totalPages} onChange={setPage} />
     </>
   );
 }

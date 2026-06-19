@@ -18,7 +18,7 @@ import { CardSkeleton } from "../../../components/CardSkeleton";
 import { ListPagination } from "../../../components/ListPagination";
 import { usePagedData } from "../../../hooks/usePagedData";
 import type { AmbulanciaEstado } from "../../../types/api";
-import { BODEGA_PATENTE, ESTADO_COLOR } from "../constants";
+import { BODEGA_PATENTE, ESTADO_COLOR } from "../../../constants/ambulancia";
 
 const ESTADO_OPTIONS: { value: AmbulanciaEstado; label: string }[] = [
   { value: "disponible", label: "Disponible" },
@@ -108,7 +108,7 @@ export function AmbulanceGrid() {
               <Button
                 size="xs"
                 variant="light"
-                onClick={() => navigate(`/flota/${amb.ambulancia_id}`)}
+                onClick={() => navigate(`/inventario/${amb.ambulancia_id}`)}
               >
                 Ver detalle
               </Button>

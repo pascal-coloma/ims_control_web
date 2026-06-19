@@ -20,6 +20,7 @@ import { PersonalPage } from "./pages/personal/PersonalPage";
 import { GruposPage } from "./pages/grupos/GruposPage";
 import { PacientesPage } from "./pages/pacientes/PacientesPage";
 import { FlotaPage } from "./pages/flota/FlotaPage";
+import { InventarioPage } from "./pages/inventario/InventarioPage";
 import { AtencionesPage } from "./pages/atenciones/AtencionesPage";
 import { AuditoriaPage } from "./pages/auditoria/AuditoriaPage";
 
@@ -71,7 +72,8 @@ function App() {
                   <Route path="grupos/:id" element={<GruposPage />} />
                   <Route path="pacientes" element={<PacientesPage />} />
                   <Route path="flota" element={<FlotaPage />} />
-                  <Route path="flota/:id" element={<FlotaPage />} />
+                  <Route path="inventario" element={<InventarioPage />} />
+                  <Route path="inventario/:id" element={<InventarioPage />} />
                   <Route path="atenciones" element={<AtencionesPage />} />
                   <Route path="atenciones/:id" element={<AtencionesPage />} />
                   <Route path="auditoria" element={<AuditoriaPage />} />

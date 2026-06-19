@@ -1,4 +1,4 @@
-import type { AmbulanciaEstado } from "../../types/api";
+import type { AmbulanciaEstado } from "../types/api";
 
 export const BODEGA_PATENTE = "BODEGA";
 

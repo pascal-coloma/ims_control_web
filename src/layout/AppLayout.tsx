@@ -18,6 +18,7 @@ import { useDisclosure } from "@mantine/hooks";
 import {
   IconAmbulance,
   IconBell,
+  IconBoxSeam,
   IconClipboardText,
   IconHistory,
   IconLogout,
@@ -37,7 +38,8 @@ const NAV_ITEMS = [
   { to: "/personal", label: "Personal", icon: IconUsers },
   { to: "/grupos", label: "Grupos", icon: IconUsersGroup },
   { to: "/pacientes", label: "Pacientes", icon: IconUserHeart },
-  { to: "/flota", label: "Flota & Inventario", icon: IconTruck },
+  { to: "/flota", label: "Flota", icon: IconTruck },
+  { to: "/inventario", label: "Inventario", icon: IconBoxSeam },
   { to: "/atenciones", label: "Atenciones", icon: IconClipboardText },
   { to: "/auditoria", label: "Auditoría", icon: IconHistory },
 ];
