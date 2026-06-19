@@ -11,7 +11,7 @@ import { IconArrowLeft } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { getAmbulancias } from "../../../api/ambulancias";
 import { queryKeys } from "../../../api/queryKeys";
-import { ESTADO_COLOR } from "../../../constants/ambulancia";
+import { ESTADO_COLOR, ESTADO_LABEL } from "../../../constants/ambulancia";
 import { InventoryTable } from "./InventoryTable";
 
 interface AmbulanceDetailProps {
@@ -48,7 +48,7 @@ export function AmbulanceDetail({
           <>
             <Title order={2}>Ambulancia {ambulancia.patente}</Title>
             <Badge color={ESTADO_COLOR[ambulancia.estado]} variant="light">
-              {ambulancia.estado}
+              {ESTADO_LABEL[ambulancia.estado] ?? ambulancia.estado}
             </Badge>
           </>
         )}

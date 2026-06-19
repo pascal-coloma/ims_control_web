@@ -15,6 +15,7 @@ import { asignarDespacho } from "../../../api/despachos";
 import { ApiError } from "../../../api/client";
 import { getGrupos, toGrupoOptions } from "../../../api/grupos";
 import { queryKeys } from "../../../api/queryKeys";
+import { ESTADO_DISPONIBLE, ESTADO_LABEL } from "../../../constants/ambulancia";
 
 interface AssignDispatchModalProps {
   despachoId: number;
@@ -49,10 +50,10 @@ export function AssignDispatchModal({
     const data = ambulancias.data ?? [];
     const filtered = showAllAmbulances
       ? data
-      : data.filter((a) => a.estado === "disponible");
+      : data.filter((a) => a.estado === ESTADO_DISPONIBLE);
     return filtered.map((a) => ({
       value: String(a.ambulancia_id),
-      label: showAllAmbulances ? `${a.patente} (${a.estado})` : a.patente,
+      label: showAllAmbulances ? `${a.patente} (${ESTADO_LABEL[a.estado]})` : a.patente,
     }));
   }, [ambulancias.data, showAllAmbulances]);
 

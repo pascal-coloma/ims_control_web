@@ -21,6 +21,7 @@ import {
 import { getGrupos, toGrupoOptions } from "../../../api/grupos";
 import { queryKeys } from "../../../api/queryKeys";
 import { PatientLookupOrRegister } from "../../../components/patients/PatientLookupOrRegister";
+import { ESTADO_DISPONIBLE } from "../../../constants/ambulancia";
 import type { Paciente } from "../../../types/api";
 
 interface NewDispatchModalProps {
@@ -54,7 +55,7 @@ export function NewDispatchModal({ opened, onClose }: NewDispatchModalProps) {
   const ambulanciaOptions = useMemo(
     () =>
       (ambulancias.data ?? [])
-        .filter((a) => a.estado === "disponible")
+        .filter((a) => a.estado === ESTADO_DISPONIBLE)
         .map((a) => ({ value: String(a.ambulancia_id), label: a.patente })),
     [ambulancias.data],
   );

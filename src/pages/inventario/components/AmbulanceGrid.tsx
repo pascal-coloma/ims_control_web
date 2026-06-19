@@ -18,14 +18,13 @@ import { CardSkeleton } from "../../../components/CardSkeleton";
 import { ListPagination } from "../../../components/ListPagination";
 import { usePagedData } from "../../../hooks/usePagedData";
 import type { AmbulanciaEstado } from "../../../types/api";
-import { BODEGA_PATENTE, ESTADO_COLOR } from "../../../constants/ambulancia";
+import { BODEGA_PATENTE, ESTADO_COLOR, ESTADO_LABEL } from "../../../constants/ambulancia";
 
-const ESTADO_OPTIONS: { value: AmbulanciaEstado; label: string }[] = [
-  { value: "disponible", label: "Disponible" },
-  { value: "en_despacho", label: "En despacho" },
-  { value: "mantencion", label: "Mantención" },
-  { value: "fuera_servicio", label: "Fuera de servicio" },
-];
+const POLL_INTERVAL_MS = 120_000;
+
+const ESTADO_OPTIONS: { value: AmbulanciaEstado; label: string }[] = (
+  Object.entries(ESTADO_LABEL) as [AmbulanciaEstado, string][]
+).map(([value, label]) => ({ value, label }));
 
 export function AmbulanceGrid() {
   const navigate = useNavigate();
@@ -35,6 +34,7 @@ export function AmbulanceGrid() {
   const ambulancias = useQuery({
     queryKey: queryKeys.ambulancias.list(),
     queryFn: getAmbulancias,
+    refetchInterval: POLL_INTERVAL_MS,
   });
 
   const rows = useMemo(() => {
@@ -85,7 +85,7 @@ export function AmbulanceGrid() {
               <Group justify="space-between" mb="xs">
                 <Text fw={700}>{amb.patente}</Text>
                 <Badge color={ESTADO_COLOR[amb.estado]} variant="light">
-                  {amb.estado}
+                  {ESTADO_LABEL[amb.estado] ?? amb.estado}
                 </Badge>
               </Group>
               <List size="sm" mb="sm">

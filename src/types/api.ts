@@ -131,11 +131,13 @@ export interface AsignarDespachoResponse {
 
 // --- Ambulancias ---
 
+// Valores literales reales de Ambulancia.ESTADOS en el backend (models.py).
 export type AmbulanciaEstado =
-  | "disponible"
-  | "en_despacho"
-  | "mantencion"
-  | "fuera_servicio";
+  | "Lista para un nuevo despacho"
+  | "Actualmente en despacho"
+  | "Preparación previa para operar"
+  | "En mantención"
+  | "Fuera de servicio temporalmente";
 
 export interface AmbulanciaStockItem {
   presentacion_id: number;

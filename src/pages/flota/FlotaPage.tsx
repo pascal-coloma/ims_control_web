@@ -13,18 +13,16 @@ import { getAmbulancias } from "../../api/ambulancias";
 import { queryKeys } from "../../api/queryKeys";
 import { ListPagination } from "../../components/ListPagination";
 import { TableSkeleton } from "../../components/TableSkeleton";
-import { BODEGA_PATENTE, ESTADO_COLOR } from "../../constants/ambulancia";
+import { BODEGA_PATENTE, ESTADO_COLOR, ESTADO_LABEL } from "../../constants/ambulancia";
 import { usePagedData } from "../../hooks/usePagedData";
 import type { AmbulanciaEstado } from "../../types/api";
 
 const COLUMN_COUNT = 2;
+const POLL_INTERVAL_MS = 120_000;
 
-const ESTADO_OPTIONS: { value: AmbulanciaEstado; label: string }[] = [
-  { value: "disponible", label: "Disponible" },
-  { value: "en_despacho", label: "En despacho" },
-  { value: "mantencion", label: "Mantención" },
-  { value: "fuera_servicio", label: "Fuera de servicio" },
-];
+const ESTADO_OPTIONS: { value: AmbulanciaEstado; label: string }[] = (
+  Object.entries(ESTADO_LABEL) as [AmbulanciaEstado, string][]
+).map(([value, label]) => ({ value, label }));
 
 export function FlotaPage() {
   const [search, setSearch] = useState("");
@@ -33,6 +31,7 @@ export function FlotaPage() {
   const ambulancias = useQuery({
     queryKey: queryKeys.ambulancias.list(),
     queryFn: getAmbulancias,
+    refetchInterval: POLL_INTERVAL_MS,
   });
 
   const rows = useMemo(() => {
@@ -90,7 +89,7 @@ export function FlotaPage() {
                 <Table.Td>{amb.patente}</Table.Td>
                 <Table.Td>
                   <Badge color={ESTADO_COLOR[amb.estado]} variant="light">
-                    {amb.estado}
+                    {ESTADO_LABEL[amb.estado] ?? amb.estado}
                   </Badge>
                 </Table.Td>
               </Table.Tr>
