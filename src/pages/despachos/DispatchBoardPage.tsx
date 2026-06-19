@@ -29,10 +29,10 @@ import { NewDispatchModal } from "./components/NewDispatchModal";
 import { ScheduleDispatchModal } from "./components/ScheduleDispatchModal";
 
 const COLUMNS: { estado: DespachoEstado; label: string }[] = [
+  { estado: "emergencia", label: "Emergencia" },
   { estado: "recibido", label: "Recibido" },
   { estado: "asignado", label: "Asignado" },
   { estado: "programado", label: "Programado" },
-  { estado: "emergencia", label: "Emergencia" },
 ];
 
 const POLL_INTERVAL_MS = 120_000;
