@@ -1,6 +1,6 @@
 import { Button, Card, Group, Table, Title } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { addPaciente, getPacientes } from "../../api/pacientes";
 import { queryKeys } from "../../api/queryKeys";
 import { ListPagination } from "../../components/ListPagination";
@@ -8,17 +8,26 @@ import { PatientLookupOrRegister } from "../../components/patients/PatientLookup
 import { PatientRegistrationFields } from "../../components/patients/PatientRegistrationFields";
 import { TableSkeleton } from "../../components/TableSkeleton";
 import { usePagedData } from "../../hooks/usePagedData";
+import { cleanRut } from "../../utils/rut";
 
 const COLUMN_COUNT = 6;
 
 export function PacientesPage() {
   const queryClient = useQueryClient();
   const [showRegister, setShowRegister] = useState(false);
+  const [rutFilter, setRutFilter] = useState("");
 
   const pacientes = useQuery({
     queryKey: queryKeys.pacientes.list(),
     queryFn: getPacientes,
   });
+
+  const filteredPacientes = useMemo(() => {
+    if (!rutFilter) return pacientes.data ?? [];
+    return (pacientes.data ?? []).filter((p) =>
+      cleanRut(p.rut).includes(rutFilter),
+    );
+  }, [pacientes.data, rutFilter]);
 
   const register = useMutation({
     mutationFn: addPaciente,
@@ -28,9 +37,8 @@ export function PacientesPage() {
     },
   });
 
-  const { page, setPage, totalPages, pageItems } = usePagedData(
-    pacientes.data ?? [],
-  );
+  const { page, setPage, totalPages, pageItems } =
+    usePagedData(filteredPacientes);
 
   return (
     <>
@@ -65,6 +73,7 @@ export function PacientesPage() {
               queryKey: queryKeys.pacientes.list(),
             })
           }
+          onRutChange={setRutFilter}
         />
       </Card>
 
