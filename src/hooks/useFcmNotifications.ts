@@ -1,12 +1,15 @@
 import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { getToken, onMessage } from "firebase/messaging";
 import { getMessagingIfSupported } from "../lib/firebase";
 import { registerFcmToken } from "../api/notifications";
+import { queryKeys } from "../api/queryKeys";
 import { useNotificationStore } from "../stores/notificationStore";
 
 // Web counterpart of the RN app's utils/firebaseMessaging.ts + NotificationContext.
 export function useFcmNotifications(): void {
   const addNotification = useNotificationStore((s) => s.addNotification);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -37,6 +40,10 @@ export function useFcmNotifications(): void {
             title: payload.notification?.title ?? "",
             body: payload.notification?.body ?? "",
           });
+          // El payload no trae un "tipo" estructurado (ver task_notificaciones.py),
+          // así que no podemos saber si afecta ambulancias o despachos: invalidamos ambas.
+          queryClient.invalidateQueries({ queryKey: queryKeys.ambulancias.list() });
+          queryClient.invalidateQueries({ queryKey: queryKeys.despachos.list() });
         });
       } catch (err) {
         console.error("FCM setup failed", err);
@@ -44,5 +51,5 @@ export function useFcmNotifications(): void {
     })();
 
     return () => unsubscribe?.();
-  }, [addNotification]);
+  }, [addNotification, queryClient]);
 }
