@@ -70,7 +70,7 @@ export function AppLayout() {
           <Indicator
             label={unreadCount}
             disabled={unreadCount === 0}
-            size={16}
+            size={14}
             color="red"
           >
             <ActionIcon
