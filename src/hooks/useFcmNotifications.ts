@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getToken, onMessage } from "firebase/messaging";
+import { notifications } from "@mantine/notifications";
 import { getMessagingIfSupported } from "../lib/firebase";
 import { registerFcmToken } from "../api/notifications";
 import { queryKeys } from "../api/queryKeys";
@@ -39,6 +40,10 @@ export function useFcmNotifications(): void {
             id: payload.messageId ?? Date.now().toString(),
             title: payload.notification?.title ?? "",
             body: payload.notification?.body ?? "",
+          });
+          notifications.show({
+            title: payload.notification?.title,
+            message: payload.notification?.body ?? "",
           });
           // El payload no trae un "tipo" estructurado (ver task_notificaciones.py),
           // así que no podemos saber si afecta ambulancias o despachos: invalidamos ambas.
