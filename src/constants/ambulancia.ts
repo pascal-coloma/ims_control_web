@@ -20,3 +20,12 @@ export const ESTADO_LABEL: Record<AmbulanciaEstado, string> = {
   "En mantención": "Mantención",
   "Fuera de servicio temporalmente": "Fuera de servicio",
 };
+
+// "En despacho" y "En preparación" los fija el flujo de despachos, no se
+// editan a mano. Control solo puede sacar una ambulancia de servicio (o
+// devolverla a disponible).
+export const ESTADOS_EDITABLES: AmbulanciaEstado[] = [
+  ESTADO_DISPONIBLE,
+  "En mantención",
+  "Fuera de servicio temporalmente",
+];
