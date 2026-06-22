@@ -11,6 +11,7 @@ import { IconX } from "@tabler/icons-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { desuscribir } from "../../../api/grupos";
 import { queryKeys } from "../../../api/queryKeys";
+import { showError } from "../../../utils/notify";
 
 interface RemoveMemberButtonProps {
   groupId: number;
@@ -36,6 +37,7 @@ export function RemoveMemberButton({
       });
       setOpened(false);
     },
+    onError: (err) => showError(err),
   });
 
   return (

@@ -8,6 +8,7 @@ import { PatientLookupOrRegister } from "../../components/patients/PatientLookup
 import { PatientRegistrationFields } from "../../components/patients/PatientRegistrationFields";
 import { TableSkeleton } from "../../components/TableSkeleton";
 import { usePagedData } from "../../hooks/usePagedData";
+import { showError } from "../../utils/notify";
 import { cleanRut } from "../../utils/rut";
 
 const COLUMN_COUNT = 6;
@@ -35,6 +36,7 @@ export function PacientesPage() {
       queryClient.invalidateQueries({ queryKey: queryKeys.pacientes.list() });
       setShowRegister(false);
     },
+    onError: (err) => showError(err),
   });
 
   const { page, setPage, totalPages, pageItems } =

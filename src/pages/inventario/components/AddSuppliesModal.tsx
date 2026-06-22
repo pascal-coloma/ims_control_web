@@ -18,6 +18,7 @@ import { getAmbulancias } from "../../../api/ambulancias";
 import { getInventario } from "../../../api/inventario";
 import { queryKeys } from "../../../api/queryKeys";
 import { addInventario } from "../../../api/inventario";
+import { showError } from "../../../utils/notify";
 
 interface SupplyRow {
   key: number;
@@ -116,6 +117,7 @@ export function AddSuppliesModal({ opened, onClose }: AddSuppliesModalProps) {
       queryClient.invalidateQueries({ queryKey: queryKeys.ambulancias.list() });
       handleClose();
     },
+    onError: (err) => showError(err),
   });
 
   function updateRow(key: number, patch: Partial<SupplyRow>) {
