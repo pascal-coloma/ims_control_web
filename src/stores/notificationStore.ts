@@ -6,8 +6,7 @@ interface NotificationState {
   unreadCount: number;
   selected: AppNotification | null;
   addNotification: (n: { id: string; title: string; body: string }) => void;
-  dismissNotification: (id: string) => void;
-  markAllRead: () => void;
+  clearAll: () => void;
   selectNotification: (n: AppNotification) => void;
   clearSelected: () => void;
 }
@@ -24,15 +23,14 @@ export const useNotificationStore = create<NotificationState>((set) => ({
       ],
       unreadCount: state.unreadCount + 1,
     })),
-  dismissNotification: (id) =>
+  clearAll: () => set({ notifications: [], unreadCount: 0 }),
+  selectNotification: (n) =>
     set((state) => ({
-      notifications: state.notifications.filter((x) => x.id !== id),
+      selected: n,
+      notifications: state.notifications.map((x) =>
+        x.id === n.id ? { ...x, read: true } : x,
+      ),
+      unreadCount: n.read ? state.unreadCount : state.unreadCount - 1,
     })),
-  markAllRead: () =>
-    set((state) => ({
-      notifications: state.notifications.map((x) => ({ ...x, read: true })),
-      unreadCount: 0,
-    })),
-  selectNotification: (n) => set({ selected: n }),
   clearSelected: () => set({ selected: null }),
 }));
