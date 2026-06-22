@@ -8,5 +8,5 @@ export function showError(err: unknown, fallback = "Algo salió mal, intenta nue
       : err instanceof Error
         ? err.message
         : fallback;
-  notifications.show({ color: "red", title: "Error", message });
+  notifications.show({ color: "red", title: "Error", message, autoClose: 8000 });
 }
