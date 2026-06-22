@@ -9,6 +9,7 @@ import {
   Drawer,
   Group,
   Indicator,
+  Modal,
   NavLink,
   Stack,
   Text,
@@ -55,6 +56,8 @@ export function AppLayout() {
     (state) => state.dismissNotification,
   );
   const markAllRead = useNotificationStore((state) => state.markAllRead);
+  const selected = useNotificationStore((state) => state.selected);
+  const clearSelected = useNotificationStore((state) => state.clearSelected);
   const [notifOpen, { open: openNotif, close: closeNotif }] =
     useDisclosure(false);
   useFcmNotifications();
@@ -171,6 +174,9 @@ export function AppLayout() {
           </Stack>
         )}
       </Drawer>
+      <Modal opened={!!selected} onClose={clearSelected} title={selected?.title}>
+        <Text>{selected?.body}</Text>
+      </Modal>
     </AppShell>
   );
 }
