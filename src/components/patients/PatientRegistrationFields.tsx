@@ -13,7 +13,7 @@ interface PatientRegistrationFieldsProps {
 interface FormValues {
   rut: string;
   nombre_completo: string;
-  fecha_nacimiento: Date | null;
+  fecha_nacimiento: string | null;
   direccion: string;
   condicion_paciente: string;
   telefono: string;
@@ -46,9 +46,7 @@ export function PatientRegistrationFields({
     if (values.nombre_completo.trim())
       data.nombre_completo = values.nombre_completo.trim();
     if (values.fecha_nacimiento)
-      data.fecha_nacimiento = values.fecha_nacimiento
-        .toISOString()
-        .slice(0, 10);
+      data.fecha_nacimiento = values.fecha_nacimiento;
     if (values.direccion.trim()) data.direccion = values.direccion.trim();
     if (values.condicion_paciente.trim())
       data.condicion_paciente = values.condicion_paciente.trim();
