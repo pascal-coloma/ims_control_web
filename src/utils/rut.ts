@@ -1,36 +1,15 @@
-const MAX_CLEAN_LENGTH = 9; // 8 digit body + check digit, Chilean RUT ceiling
-
+// ponytail: strips everything but digits/K so RUTs can be compared or masked
+// regardless of dot/dash placement; DV is never validated since invalid-DV
+// RUTs already exist in prod data.
 export function cleanRut(value: string): string {
-  return value
-    .replace(/[^0-9kK]/g, "")
-    .toUpperCase()
-    .slice(0, MAX_CLEAN_LENGTH);
+  return value.replace(/[^0-9kK]/g, "").toUpperCase();
 }
 
-function checkDigit(body: string): string {
-  let sum = 0;
-  let multiplier = 2;
-  for (let i = body.length - 1; i >= 0; i--) {
-    sum += Number(body[i]) * multiplier;
-    multiplier = multiplier === 7 ? 2 : multiplier + 1;
-  }
-  const remainder = 11 - (sum % 11);
-  if (remainder === 11) return "0";
-  if (remainder === 10) return "K";
-  return String(remainder);
-}
-
+/** Masks as-you-type into xx.xxx.xxx-x. */
 export function formatRut(value: string): string {
-  const clean = cleanRut(value);
-  if (clean.length < 2) return clean;
+  const clean = cleanRut(value).slice(0, 9);
+  if (!clean) return "";
   const body = clean.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  return `${body}-${clean.slice(-1)}`;
-}
-
-export function isValidRut(value: string): boolean {
-  const clean = cleanRut(value);
-  if (clean.length < 2) return false;
-  const body = clean.slice(0, -1);
-  if (!/^\d+$/.test(body)) return false;
-  return checkDigit(body) === clean.slice(-1);
+  const dv = clean.slice(-1);
+  return body ? `${body}-${dv}` : dv;
 }

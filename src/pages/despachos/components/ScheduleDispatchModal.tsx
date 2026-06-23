@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { programarDespacho } from "../../../api/despachos";
 import { getGrupos, toGrupoOptions } from "../../../api/grupos";
 import { queryKeys } from "../../../api/queryKeys";
+import { showError } from "../../../utils/notify";
 
 interface ScheduleDispatchModalProps {
   despachoId: number;
@@ -46,6 +47,7 @@ export function ScheduleDispatchModal({
       });
       handleClose();
     },
+    onError: (err) => showError(err),
   });
 
   function handleClose() {

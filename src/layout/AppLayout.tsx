@@ -9,12 +9,15 @@ import {
   Drawer,
   Group,
   Indicator,
+  Modal,
   NavLink,
+  SegmentedControl,
   Stack,
   Text,
   UnstyledButton,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { useState } from "react";
 import {
   IconAmbulance,
   IconBell,
@@ -51,12 +54,18 @@ export function AppLayout() {
 
   const notifications = useNotificationStore((state) => state.notifications);
   const unreadCount = useNotificationStore((state) => state.unreadCount);
-  const dismissNotification = useNotificationStore(
-    (state) => state.dismissNotification,
+  const clearAll = useNotificationStore((state) => state.clearAll);
+  const selected = useNotificationStore((state) => state.selected);
+  const selectNotification = useNotificationStore(
+    (state) => state.selectNotification,
   );
-  const markAllRead = useNotificationStore((state) => state.markAllRead);
+  const clearSelected = useNotificationStore((state) => state.clearSelected);
   const [notifOpen, { open: openNotif, close: closeNotif }] =
     useDisclosure(false);
+  const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
+  const filteredNotifications = notifications.filter(
+    (n) => filter === "all" || (filter === "unread" ? !n.read : n.read),
+  );
   useFcmNotifications();
 
   return (
@@ -76,10 +85,7 @@ export function AppLayout() {
             <ActionIcon
               variant="subtle"
               size="lg"
-              onClick={() => {
-                openNotif();
-                markAllRead();
-              }}
+              onClick={openNotif}
             >
               <IconBell size={20} />
             </ActionIcon>
@@ -140,37 +146,59 @@ export function AppLayout() {
         title="Notificaciones"
         size="sm"
       >
-        {notifications.length === 0 ? (
-          <Text c="dimmed" ta="center" mt="xl">
-            Sin notificaciones
-          </Text>
-        ) : (
-          <Stack gap="xs">
-            {notifications.map((n) => (
-              <UnstyledButton
-                key={n.id}
-                onClick={() => dismissNotification(n.id)}
-              >
-                <Stack
-                  gap={2}
-                  p="xs"
-                  style={{
-                    borderRadius: 8,
-                    backgroundColor: n.read ? undefined : "#eff6ff",
-                  }}
+        <Stack gap="sm">
+          <Group justify="space-between">
+            <SegmentedControl
+              size="xs"
+              value={filter}
+              onChange={(v) => setFilter(v as "all" | "unread" | "read")}
+              data={[
+                { label: "Todas", value: "all" },
+                { label: "Nuevas", value: "unread" },
+                { label: "Vistas", value: "read" },
+              ]}
+            />
+            {notifications.length > 0 && (
+              <Button variant="subtle" color="red" size="xs" onClick={clearAll}>
+                Borrar
+              </Button>
+            )}
+          </Group>
+          {filteredNotifications.length === 0 ? (
+            <Text c="dimmed" ta="center" mt="xl">
+              Sin notificaciones
+            </Text>
+          ) : (
+            <Stack gap="xs">
+              {filteredNotifications.map((n) => (
+                <UnstyledButton
+                  key={n.id}
+                  onClick={() => selectNotification(n)}
                 >
-                  <Text size="sm" fw={n.read ? 400 : 600}>
-                    {n.title}
-                  </Text>
-                  <Text size="xs" c="dimmed">
-                    {n.body}
-                  </Text>
-                </Stack>
-              </UnstyledButton>
-            ))}
-          </Stack>
-        )}
+                  <Stack
+                    gap={2}
+                    p="xs"
+                    style={{
+                      borderRadius: 8,
+                      backgroundColor: n.read ? undefined : "#eff6ff",
+                    }}
+                  >
+                    <Text size="sm" fw={n.read ? 400 : 600}>
+                      {n.title}
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      {n.body}
+                    </Text>
+                  </Stack>
+                </UnstyledButton>
+              ))}
+            </Stack>
+          )}
+        </Stack>
       </Drawer>
+      <Modal opened={!!selected} onClose={clearSelected} title={selected?.title}>
+        <Text>{selected?.body}</Text>
+      </Modal>
     </AppShell>
   );
 }

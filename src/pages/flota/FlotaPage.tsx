@@ -8,8 +8,8 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
-import { getAmbulancias } from "../../api/ambulancias";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { cambiarEstadoAmbulancia, getAmbulancias } from "../../api/ambulancias";
 import { queryKeys } from "../../api/queryKeys";
 import { ListPagination } from "../../components/ListPagination";
 import { TableSkeleton } from "../../components/TableSkeleton";
@@ -17,16 +17,22 @@ import {
   BODEGA_PATENTE,
   ESTADO_COLOR,
   ESTADO_LABEL,
+  ESTADOS_EDITABLES,
 } from "../../constants/ambulancia";
 import { usePagedData } from "../../hooks/usePagedData";
+import { showError } from "../../utils/notify";
 import type { AmbulanciaEstado } from "../../types/api";
 
-const COLUMN_COUNT = 2;
+const COLUMN_COUNT = 3;
 const POLL_INTERVAL_MS = 120_000;
 
 const ESTADO_OPTIONS: { value: AmbulanciaEstado; label: string }[] = (
   Object.entries(ESTADO_LABEL) as [AmbulanciaEstado, string][]
 ).map(([value, label]) => ({ value, label }));
+
+const ESTADO_EDITABLE_OPTIONS = ESTADO_OPTIONS.filter((o) =>
+  ESTADOS_EDITABLES.includes(o.value),
+);
 
 export function FlotaPage() {
   const [search, setSearch] = useState("");
@@ -51,6 +57,15 @@ export function FlotaPage() {
   const { page, setPage, totalPages, pageItems } = usePagedData(rows);
 
   useEffect(() => setPage(1), [search, estadoFilter, setPage]);
+
+  const queryClient = useQueryClient();
+  const cambiarEstado = useMutation({
+    mutationFn: (vars: { ambid: number; estado: AmbulanciaEstado }) =>
+      cambiarEstadoAmbulancia(vars.ambid, vars.estado),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.ambulancias.list() }),
+    onError: (err) => showError(err, "No se pudo cambiar el estado"),
+  });
 
   return (
     <>
@@ -82,6 +97,7 @@ export function FlotaPage() {
           <Table.Tr>
             <Table.Th>Patente</Table.Th>
             <Table.Th>Estado</Table.Th>
+            <Table.Th>Cambiar estado</Table.Th>
           </Table.Tr>
         </Table.Thead>
         {ambulancias.isLoading ? (
@@ -95,6 +111,22 @@ export function FlotaPage() {
                   <Badge color={ESTADO_COLOR[amb.estado]} variant="light">
                     {ESTADO_LABEL[amb.estado] ?? amb.estado}
                   </Badge>
+                </Table.Td>
+                <Table.Td>
+                  <Select
+                    placeholder="Cambiar a..."
+                    data={ESTADO_EDITABLE_OPTIONS}
+                    value={null}
+                    onChange={(value) =>
+                      value &&
+                      cambiarEstado.mutate({
+                        ambid: amb.ambulancia_id,
+                        estado: value as AmbulanciaEstado,
+                      })
+                    }
+                    disabled={!ESTADOS_EDITABLES.includes(amb.estado)}
+                    w={180}
+                  />
                 </Table.Td>
               </Table.Tr>
             ))}

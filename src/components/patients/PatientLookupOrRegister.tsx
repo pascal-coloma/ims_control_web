@@ -1,18 +1,22 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Autocomplete, Button, Group, Stack, Text } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "../../api/client";
 import { addPaciente, getPaciente, getPacientes } from "../../api/pacientes";
 import { queryKeys } from "../../api/queryKeys";
 import type { Paciente } from "../../types/api";
-import { formatRut } from "../../utils/rut";
+import { cleanRut, formatRut } from "../../utils/rut";
 import { PatientRegistrationFields } from "./PatientRegistrationFields";
 
 interface PatientLookupOrRegisterProps {
   /** Called once a patient is found or successfully registered. */
   onResolved: (paciente: Paciente) => void;
+  /** Called on every keystroke with the input's digits/K only (no dots/dash), for substring filtering. */
+  onRutChange?: (rut: string) => void;
   initialRut?: string;
 }
+
+const RUT_FORMAT = /^\d{7,8}-[0-9kK]$/;
 
 /**
  * Shared RUT lookup-or-register flow (§2.2 NewDispatchModal and §2.5 Pacientes).
@@ -21,6 +25,7 @@ interface PatientLookupOrRegisterProps {
  */
 export function PatientLookupOrRegister({
   onResolved,
+  onRutChange,
   initialRut = "",
 }: PatientLookupOrRegisterProps) {
   const queryClient = useQueryClient();
@@ -75,11 +80,16 @@ export function PatientLookupOrRegister({
     },
   });
 
+  const backendRut = rut.replace(/\./g, "");
+
   function handleSearch() {
-    setResolved(null);
-    setNotFound(false);
-    lookup.mutate(rut);
+    lookup.mutate(backendRut);
   }
+
+  useEffect(() => {
+    if (RUT_FORMAT.test(backendRut)) handleSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [backendRut]);
 
   return (
     <Stack gap="xs">
@@ -89,8 +99,9 @@ export function PatientLookupOrRegister({
           placeholder="11.222.333-4"
           data={options}
           value={rut}
-          onChange={(value) => {
-            setRut(formatRut(value));
+          onChange={(event) => {
+            setRut(formatRut(event.currentTarget.value));
+            onRutChange?.(cleanRut(event.currentTarget.value));
             setResolved(null);
             setNotFound(false);
             setRegistering(false);
@@ -140,7 +151,7 @@ export function PatientLookupOrRegister({
 
       {registering && (
         <PatientRegistrationFields
-          initialRut={rut}
+          initialRut={backendRut}
           submitting={register.isPending}
           onSubmit={(data) => register.mutate(data)}
           onCancel={() => setRegistering(false)}

@@ -11,6 +11,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { crearGrupo } from "../../../api/grupos";
 import { getPersonal } from "../../../api/personal";
 import { queryKeys } from "../../../api/queryKeys";
+import { showError } from "../../../utils/notify";
 
 interface CreateGroupModalProps {
   opened: boolean;
@@ -44,6 +45,7 @@ export function CreateGroupModal({ opened, onClose }: CreateGroupModalProps) {
       queryClient.invalidateQueries({ queryKey: queryKeys.grupos.list() });
       handleClose();
     },
+    onError: (err) => showError(err),
   });
 
   function handleClose() {

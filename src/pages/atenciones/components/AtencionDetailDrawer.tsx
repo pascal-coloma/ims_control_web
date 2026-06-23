@@ -22,6 +22,7 @@ import {
   getFhirBundle,
 } from "../../../api/atenciones";
 import { generatePDF } from "../../../utils/pdf";
+import { showError } from "../../../utils/notify";
 import type { AtencionListItem, DocumentoAtencion } from "../../../types/api";
 import { SELLO_COLOR } from "../constants";
 
@@ -52,18 +53,8 @@ export function AtencionDetailDrawer({
     onError: (err) => {
       if (err instanceof ApiError && err.status === 404) {
         setNoDocument(true);
-      } else if (err instanceof Error) {
-        notifications.show({
-          color: "red",
-          title: "Error",
-          message: err.message,
-        });
       } else {
-        notifications.show({
-          color: "red",
-          title: "Error",
-          message: "Algo salió mal, intenta nuevamente",
-        });
+        showError(err);
       }
     },
   });
@@ -89,13 +80,7 @@ export function AtencionDetailDrawer({
         });
       }
     },
-    onError: () => {
-      notifications.show({
-        color: "red",
-        title: "Error",
-        message: "Algo salió mal, intenta nuevamente",
-      });
-    },
+    onError: (err) => showError(err),
   });
 
   function handleClose() {
