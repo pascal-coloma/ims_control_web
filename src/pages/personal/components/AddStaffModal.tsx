@@ -70,7 +70,11 @@ export function AddStaffModal({
   }
 
   const valid =
-    rut.trim() && firstName.trim() && lastName.trim() && rolId !== null && !duplicate;
+    rut.trim() &&
+    firstName.trim() &&
+    lastName.trim() &&
+    rolId !== null &&
+    !duplicate;
 
   return (
     <Modal opened={opened} onClose={handleClose} title="Agregar Personal">

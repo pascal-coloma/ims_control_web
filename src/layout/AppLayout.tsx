@@ -82,11 +82,7 @@ export function AppLayout() {
             size={14}
             color="red"
           >
-            <ActionIcon
-              variant="subtle"
-              size="lg"
-              onClick={openNotif}
-            >
+            <ActionIcon variant="subtle" size="lg" onClick={openNotif}>
               <IconBell size={20} />
             </ActionIcon>
           </Indicator>
@@ -196,7 +192,11 @@ export function AppLayout() {
           )}
         </Stack>
       </Drawer>
-      <Modal opened={!!selected} onClose={clearSelected} title={selected?.title}>
+      <Modal
+        opened={!!selected}
+        onClose={clearSelected}
+        title={selected?.title}
+      >
         <Text>{selected?.body}</Text>
       </Modal>
     </AppShell>
