@@ -2,6 +2,7 @@ import { Button, Group, Stack, TextInput } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import type { Paciente } from "../../types/api";
+import { formatRut, isValidRut } from "../../utils/rut";
 
 interface PatientRegistrationFieldsProps {
   initialRut: string;
@@ -28,7 +29,7 @@ export function PatientRegistrationFields({
 }: PatientRegistrationFieldsProps) {
   const form = useForm<FormValues>({
     initialValues: {
-      rut: initialRut,
+      rut: formatRut(initialRut),
       nombre_completo: "",
       fecha_nacimiento: null,
       direccion: "",
@@ -37,7 +38,7 @@ export function PatientRegistrationFields({
       comuna: "",
     },
     validate: {
-      rut: (value) => (value.trim() ? null : "RUT requerido"),
+      rut: (value) => (isValidRut(value) ? null : "RUT inválido"),
     },
   });
 
@@ -60,7 +61,15 @@ export function PatientRegistrationFields({
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack gap="xs">
-        <TextInput label="RUT" required {...form.getInputProps("rut")} />
+        <TextInput
+          label="RUT"
+          placeholder="11.222.333-4"
+          required
+          {...form.getInputProps("rut")}
+          onChange={(event) =>
+            form.setFieldValue("rut", formatRut(event.currentTarget.value))
+          }
+        />
         <TextInput
           label="Nombre completo"
           {...form.getInputProps("nombre_completo")}

@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { Alert, Button, Group, Stack, Text, TextInput } from "@mantine/core";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { Alert, Autocomplete, Button, Group, Stack, Text } from "@mantine/core";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "../../api/client";
-import { addPaciente, getPaciente } from "../../api/pacientes";
+import { addPaciente, getPaciente, getPacientes } from "../../api/pacientes";
 import { queryKeys } from "../../api/queryKeys";
 import type { Paciente } from "../../types/api";
+import { formatRut } from "../../utils/rut";
 import { PatientRegistrationFields } from "./PatientRegistrationFields";
 
 interface PatientLookupOrRegisterProps {
@@ -23,10 +24,26 @@ export function PatientLookupOrRegister({
   initialRut = "",
 }: PatientLookupOrRegisterProps) {
   const queryClient = useQueryClient();
-  const [rut, setRut] = useState(initialRut);
+  const [rut, setRut] = useState(formatRut(initialRut));
   const [notFound, setNotFound] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [resolved, setResolved] = useState<Paciente | null>(null);
+
+  const pacientes = useQuery({
+    queryKey: queryKeys.pacientes.list(),
+    queryFn: getPacientes,
+  });
+
+  const options = useMemo(
+    () =>
+      (pacientes.data ?? []).map((p) => ({
+        value: formatRut(p.rut),
+        label: p.nombre_completo
+          ? `${formatRut(p.rut)} — ${p.nombre_completo}`
+          : formatRut(p.rut),
+      })),
+    [pacientes.data],
+  );
 
   const lookup = useMutation({
     mutationFn: (lookupRut: string) => getPaciente(lookupRut),
@@ -67,15 +84,27 @@ export function PatientLookupOrRegister({
   return (
     <Stack gap="xs">
       <Group align="flex-end" gap="xs">
-        <TextInput
+        <Autocomplete
           label="RUT paciente"
           placeholder="11.222.333-4"
+          data={options}
           value={rut}
-          onChange={(event) => {
-            setRut(event.currentTarget.value);
+          onChange={(value) => {
+            setRut(formatRut(value));
             setResolved(null);
             setNotFound(false);
             setRegistering(false);
+          }}
+          onOptionSubmit={(value) => {
+            const match = pacientes.data?.find(
+              (p) => formatRut(p.rut) === value,
+            );
+            if (match) {
+              setNotFound(false);
+              setRegistering(false);
+              setResolved(match);
+              onResolved(match);
+            }
           }}
           style={{ flex: 1 }}
         />

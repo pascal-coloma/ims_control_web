@@ -11,6 +11,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { addPersonal } from "../../../api/personal";
 import type { AddStaffResponse } from "../../../types/api";
+import { formatRut, isValidRut } from "../../../utils/rut";
 
 const ROLES = [
   { label: "Control", value: "1" },
@@ -62,20 +63,23 @@ export function AddStaffModal({
     onClose();
   }
 
+  const rutValid = isValidRut(rut);
   const valid =
-    rut.trim() && firstName.trim() && lastName.trim() && rolId !== null;
+    rutValid && firstName.trim() && lastName.trim() && rolId !== null;
 
   return (
     <Modal opened={opened} onClose={handleClose} title="Agregar Personal">
       <Stack gap="sm">
         <TextInput
           label="RUT"
+          placeholder="11.222.333-4"
           value={rut}
           onChange={(event) => {
-            const value = event.currentTarget.value;
+            const value = formatRut(event.currentTarget.value);
             setRut(value);
             if (!usernameTouched) setUsername(value);
           }}
+          error={rut.trim() && !rutValid ? "RUT inválido" : null}
           required
         />
         <TextInput
