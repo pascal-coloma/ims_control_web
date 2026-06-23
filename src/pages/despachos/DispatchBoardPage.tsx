@@ -4,6 +4,7 @@ import {
   ActionIcon,
   Alert,
   Button,
+  Chip,
   Group,
   ScrollArea,
   SimpleGrid,
@@ -35,6 +36,7 @@ const COLUMNS: { estado: DespachoEstado; label: string }[] = [
   { estado: "recibido", label: "Recibido" },
   { estado: "asignado", label: "Asignado" },
   { estado: "programado", label: "Programado" },
+  { estado: "finalizado", label: "Finalizado" },
 ];
 
 const POLL_INTERVAL_MS = 120_000;
@@ -45,6 +47,9 @@ export function DispatchBoardPage() {
   const detailId = id ? Number(id) : null;
 
   const [search, setSearch] = useState("");
+  const [estadoFilter, setEstadoFilter] = useState<DespachoEstado[]>(
+    COLUMNS.map((c) => c.estado),
+  );
   const [newDispatchOpen, setNewDispatchOpen] = useState(false);
   const [assignDispatchId, setAssignDispatchId] = useState<number | null>(null);
   const [scheduleDispatchId, setScheduleDispatchId] = useState<number | null>(
@@ -128,12 +133,23 @@ export function DispatchBoardPage() {
         </Group>
       </Group>
 
-      <TextInput
-        placeholder="Buscar dirección / paciente"
-        value={search}
-        onChange={(event) => setSearch(event.currentTarget.value)}
-        w={320}
-      />
+      <Group align="flex-end">
+        <TextInput
+          placeholder="Buscar dirección / paciente"
+          value={search}
+          onChange={(event) => setSearch(event.currentTarget.value)}
+          w={320}
+        />
+        <Chip.Group multiple value={estadoFilter} onChange={setEstadoFilter}>
+          <Group gap="xs">
+            {COLUMNS.map((col) => (
+              <Chip key={col.estado} value={col.estado} size="sm">
+                {col.label}
+              </Chip>
+            ))}
+          </Group>
+        </Chip.Group>
+      </Group>
 
       {ambulanciasQuery.isError && (
         <Alert
@@ -171,19 +187,21 @@ export function DispatchBoardPage() {
         </Alert>
       ) : (
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="md">
-          {COLUMNS.map((col) => (
-            <DispatchColumn
-              key={col.estado}
-              label={col.label}
-              items={columns.get(col.estado) ?? []}
-              search={search}
-              ambulanciaPatentes={ambulanciaPatentes}
-              isLoading={despachosQuery.isLoading}
-              onCardClick={(id) => navigate(`/despachos/${id}`)}
-              onAssign={setAssignDispatchId}
-              onSchedule={setScheduleDispatchId}
-            />
-          ))}
+          {COLUMNS.filter((col) => estadoFilter.includes(col.estado)).map(
+            (col) => (
+              <DispatchColumn
+                key={col.estado}
+                label={col.label}
+                items={columns.get(col.estado) ?? []}
+                search={search}
+                ambulanciaPatentes={ambulanciaPatentes}
+                isLoading={despachosQuery.isLoading}
+                onCardClick={(id) => navigate(`/despachos/${id}`)}
+                onAssign={setAssignDispatchId}
+                onSchedule={setScheduleDispatchId}
+              />
+            ),
+          )}
         </SimpleGrid>
       )}
 
