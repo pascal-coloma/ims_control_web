@@ -11,6 +11,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { addPersonal } from "../../../api/personal";
 import type { AddStaffResponse } from "../../../types/api";
+import { formatRut } from "../../../utils/rut";
 
 const ROLES = [
   { label: "Control", value: "1" },
@@ -70,8 +71,9 @@ export function AddStaffModal({
         <TextInput
           label="RUT"
           value={rut}
+          placeholder="11.222.333-4"
           onChange={(event) => {
-            const value = event.currentTarget.value;
+            const value = formatRut(event.currentTarget.value);
             setRut(value);
             if (!usernameTouched) setUsername(value);
           }}
