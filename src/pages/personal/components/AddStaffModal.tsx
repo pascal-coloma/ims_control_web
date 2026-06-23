@@ -10,8 +10,8 @@ import {
 } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
 import { addPersonal } from "../../../api/personal";
-import type { AddStaffResponse } from "../../../types/api";
-import { formatRut } from "../../../utils/rut";
+import type { AddStaffResponse, PersonalListItem } from "../../../types/api";
+import { cleanRut, formatRut } from "../../../utils/rut";
 
 const ROLES = [
   { label: "Control", value: "1" },
@@ -24,12 +24,14 @@ interface AddStaffModalProps {
   opened: boolean;
   onClose: () => void;
   onProvisioned: (result: AddStaffResponse) => void;
+  existing: PersonalListItem[];
 }
 
 export function AddStaffModal({
   opened,
   onClose,
   onProvisioned,
+  existing,
 }: AddStaffModalProps) {
   const [rut, setRut] = useState("");
   const [username, setUsername] = useState("");
@@ -38,13 +40,17 @@ export function AddStaffModal({
   const [lastName, setLastName] = useState("");
   const [rolId, setRolId] = useState<string | null>(null);
 
+  // Backend stores RUTs without dots but with the dash (e.g. "12345678-9").
+  const backendRut = rut.replace(/\./g, "");
+  const duplicate = existing.find((p) => cleanRut(p.rut) === cleanRut(rut));
+
   const create = useMutation({
     mutationFn: () =>
       addPersonal({
-        username: username || rut,
+        username: username || backendRut,
         first_name: firstName,
         last_name: lastName,
-        rut,
+        rut: backendRut,
         rol_id: Number(rolId!),
       }),
     onSuccess: (result) => {
@@ -63,7 +69,8 @@ export function AddStaffModal({
     onClose();
   }
 
-  const valid = rut.trim() && firstName.trim() && lastName.trim() && rolId !== null;
+  const valid =
+    rut.trim() && firstName.trim() && lastName.trim() && rolId !== null && !duplicate;
 
   return (
     <Modal opened={opened} onClose={handleClose} title="Agregar Personal">
@@ -72,10 +79,14 @@ export function AddStaffModal({
           label="RUT"
           value={rut}
           placeholder="11.222.333-4"
+          error={
+            duplicate &&
+            `RUT ya registrado para ${duplicate.first_name} ${duplicate.last_name}`
+          }
           onChange={(event) => {
             const value = formatRut(event.currentTarget.value);
             setRut(value);
-            if (!usernameTouched) setUsername(value);
+            if (!usernameTouched) setUsername(value.replace(/\./g, ""));
           }}
           required
         />
