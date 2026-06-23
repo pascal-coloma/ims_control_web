@@ -33,6 +33,7 @@ const TIPO_OPTIONS: { value: LogTipo; label: string }[] = [
   { value: "despacho", label: "Despacho" },
   { value: "grupo", label: "Grupo" },
   { value: "paciente", label: "Paciente" },
+  { value: "informacion", label: "Información" },
 ];
 
 const TIPO_COLOR: Record<LogTipo, string> = {
@@ -42,6 +43,7 @@ const TIPO_COLOR: Record<LogTipo, string> = {
   despacho: "orange",
   grupo: "indigo",
   paciente: "pink",
+  informacion: "grey",
 };
 
 export function AuditoriaPage() {

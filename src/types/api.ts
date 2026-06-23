@@ -212,7 +212,8 @@ export type LogTipo =
   | "ambulancia"
   | "despacho"
   | "grupo"
-  | "paciente";
+  | "paciente"
+  | "informacion";
 
 export interface LogEntry {
   id: number;
