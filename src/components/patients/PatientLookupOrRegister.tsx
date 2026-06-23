@@ -99,9 +99,9 @@ export function PatientLookupOrRegister({
           placeholder="11.222.333-4"
           data={options}
           value={rut}
-          onChange={(event) => {
-            setRut(formatRut(event.currentTarget.value));
-            onRutChange?.(cleanRut(event.currentTarget.value));
+          onChange={(value) => {
+            setRut(formatRut(value));
+            onRutChange?.(cleanRut(value));
             setResolved(null);
             setNotFound(false);
             setRegistering(false);
