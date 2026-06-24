@@ -12,6 +12,7 @@ import {
 } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { deletePersonal, getPersonal } from "../../api/personal";
 import { queryKeys } from "../../api/queryKeys";
 import { ListPagination } from "../../components/ListPagination";
@@ -100,7 +101,7 @@ export function PersonalPage() {
                 </Table.Td>
                 <Table.Td>
                   {person.last_login
-                    ? new Date(person.last_login).toLocaleString()
+                    ? dayjs(person.last_login).format("DD/MM/YYYY HH:mm")
                     : "Nunca"}
                 </Table.Td>
                 <Table.Td>
