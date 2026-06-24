@@ -26,6 +26,7 @@ export interface PersonalListItem {
   rut: string;
   is_active: boolean;
   rol_nombre: string | null;
+  last_login: string | null;
 }
 
 export interface AddStaffRequest {

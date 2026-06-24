@@ -21,7 +21,7 @@ import type { AddStaffResponse, PersonalListItem } from "../../types/api";
 import { AddStaffModal } from "./components/AddStaffModal";
 import { ProvisioningResultModal } from "./components/ProvisioningResultModal";
 
-const COLUMN_COUNT = 5;
+const COLUMN_COUNT = 6;
 
 export function PersonalPage() {
   const queryClient = useQueryClient();
@@ -75,6 +75,7 @@ export function PersonalPage() {
             <Table.Th>RUT</Table.Th>
             <Table.Th>Rol</Table.Th>
             <Table.Th>Estado</Table.Th>
+            <Table.Th>Último inicio de sesión</Table.Th>
             <Table.Th />
           </Table.Tr>
         </Table.Thead>
@@ -96,6 +97,11 @@ export function PersonalPage() {
                   >
                     {person.is_active ? "Activo" : "Inactivo"}
                   </Badge>
+                </Table.Td>
+                <Table.Td>
+                  {person.last_login
+                    ? new Date(person.last_login).toLocaleString()
+                    : "Nunca"}
                 </Table.Td>
                 <Table.Td>
                   <ActionIcon
