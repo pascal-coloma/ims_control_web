@@ -1,3 +1,6 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { QRCodeSVG } from "qrcode.react";
 import dayjs from "dayjs";
 import type { DocumentoAtencion } from "../types/api";
 
@@ -26,6 +29,11 @@ export function generatePDF(data: DocumentoAtencion): void {
     insumos_utilizados,
     Hash,
   } = data;
+
+  const verifyUrl = `${window.location.origin}/api/documentos/verificar/?hash=${Hash}`;
+  const qrSvg = renderToStaticMarkup(
+    createElement(QRCodeSVG, { value: verifyUrl, size: 64, marginSize: 1 }),
+  );
 
   const signosRows = signos_vitales
     .map(
@@ -238,7 +246,13 @@ export function generatePDF(data: DocumentoAtencion): void {
           background: #f9f9f9;
           font-size: 7px;
           color: #666;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .hash-text {
           word-break: break-all;
+          flex: 1;
         }
         .condicion-row {
           display: flex;
@@ -474,9 +488,10 @@ export function generatePDF(data: DocumentoAtencion): void {
         </div>
       </div>
 
-      <!-- HASH -->
+      <!-- HASH + QR DE VERIFICACIÓN -->
       <div class="hash-box">
-        <strong>Hash SHA-256:</strong> ${Hash}
+        <span class="hash-text"><strong>Hash SHA-256:</strong> ${Hash}</span>
+        ${qrSvg}
       </div>
 
     </body>
