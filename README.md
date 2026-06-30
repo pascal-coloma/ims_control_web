@@ -1,73 +1,60 @@
-# React + TypeScript + Vite
+# IMS Control Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Panel de control web para IMS Ambulancias. Permite al personal de control gestionar despachos, pacientes, atenciones, personal, flota, inventario, grupos y auditoría.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19 + TypeScript + Vite
+- [Mantine](https://mantine.dev) (UI, forms, dates, notifications)
+- React Router para el ruteo
+- TanStack Query para estado de servidor
+- Zustand para estado de auth
+- Firebase (mensajería push / FCM)
 
-## React Compiler
+## Requisitos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node 20+
+- Variables de entorno (archivo `.env.local`):
+  - `VITE_FIREBASE_API_KEY`
+  - `VITE_FIREBASE_WEB_APP_ID`
+  - `VITE_FIREBASE_VAPID_KEY`
 
-## Expanding the ESLint configuration
+## Desarrollo
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+`predev`/`prebuild` generan `public/firebase-messaging-sw.js` a partir del template, inyectando las claves de Firebase.
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+En desarrollo, Vite proxea `/ims` hacia `https://api.imsambulancias.cl` (ver [vite.config.ts](vite.config.ts)).
 
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+## Scripts
+
+- `npm run dev` — servidor de desarrollo
+- `npm run build` — type-check (`tsc -b`) + build de producción
+- `npm run preview` — sirve el build localmente
+- `npm run lint` — ESLint
+
+## Estructura
+
 ```
+src/
+  api/        # cliente fetch + funciones por recurso (despachos, pacientes, personal, ...)
+  components/ # componentes compartidos
+  hooks/      # hooks compartidos
+  layout/     # shell de la app
+  lib/        # firebase, etc.
+  pages/      # una carpeta por sección (atenciones, despachos, flota, grupos, inventario, pacientes, personal, auditoria, auth)
+  routes/     # guards de auth/rol (AuthGuard, RoleGuard, GuestGuard)
+  stores/     # estado global (zustand)
+  types/      # tipos compartidos
+  utils/      # utilidades
+```
+
+El acceso está restringido a usuarios con rol `control`; el resto es redirigido a una pantalla de bloqueo (ver [src/routes](src/routes)).
+
+## Despliegue
+
+`main` se despliega automáticamente a EC2 vía rsync al hacer push (ver [.github/workflows/deploy.yml](.github/workflows/deploy.yml)).

@@ -91,12 +91,11 @@ export function AppLayout() {
       <AppShellNavbar p="md">
         <Stack gap="xs" h="100%" justify="space-between">
           <Stack gap={4}>
-            <Text fw={700} size="lg">
-              IMS Ambulancias
-            </Text>
-            <Text size="xs" c="dimmed" mb="sm">
-              Centro de Control
-            </Text>
+            <img
+              src="/logo_ims.webp"
+              alt="IMS Ambulancias"
+              style={{ width: "100%", maxWidth: 180, marginBottom: 12 }}
+            />
             {NAV_ITEMS.map((item) => (
               <NavLink
                 key={item.to}

@@ -1,6 +1,11 @@
 import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { MantineProvider } from "@mantine/core";
+import { MantineProvider, createTheme } from "@mantine/core";
+
+const theme = createTheme({
+  primaryColor: "red",
+  primaryShade: 8,
+});
 import { Notifications, notifications } from "@mantine/notifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -49,7 +54,7 @@ function App() {
   }, [logout]);
 
   return (
-    <MantineProvider defaultColorScheme="light">
+    <MantineProvider theme={theme} defaultColorScheme="light">
       <Notifications />
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
