@@ -74,7 +74,11 @@ export function DispatchDetailDrawer({
   });
   const nombrePersonal = (id?: number) => {
     const p = personal?.find((p) => p.id === id);
-    return p ? `${p.first_name} ${p.last_name}` : id !== undefined ? `#${id}` : null;
+    return p
+      ? `${p.first_name} ${p.last_name}`
+      : id !== undefined
+        ? `#${id}`
+        : null;
   };
 
   return (
@@ -196,13 +200,13 @@ export function DispatchDetailDrawer({
 
           {(despacho.estado === "recibido" ||
             despacho.estado === "programado") && (
-              <Group mt="md">
-                <Button onClick={onAssign}>Asignar</Button>
-                <Button variant="light" onClick={onSchedule}>
-                  {despacho.estado === "programado" ? "Reprogramar" : "Programar"}
-                </Button>
-              </Group>
-            )}
+            <Group mt="md">
+              <Button onClick={onAssign}>Asignar</Button>
+              <Button variant="light" onClick={onSchedule}>
+                {despacho.estado === "programado" ? "Reprogramar" : "Programar"}
+              </Button>
+            </Group>
+          )}
         </Stack>
       )}
     </Drawer>
