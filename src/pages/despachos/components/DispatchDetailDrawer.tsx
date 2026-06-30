@@ -13,8 +13,10 @@ import {
 import { IconAlertCircle } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { getAmbulancia } from "../../../api/ambulancias";
 import { ApiError } from "../../../api/client";
 import { getDespacho } from "../../../api/despachos";
+import { getPersonal } from "../../../api/personal";
 import { queryKeys } from "../../../api/queryKeys";
 
 interface DispatchDetailDrawerProps {
@@ -57,6 +59,23 @@ export function DispatchDetailDrawer({
   });
 
   const despacho = data;
+
+  const { data: ambulancias } = useQuery({
+    queryKey: queryKeys.ambulancias.detail(despacho?.ambulancia_id ?? 0),
+    queryFn: () => getAmbulancia(despacho!.ambulancia_id!),
+    enabled: opened && !!despacho?.ambulancia_id,
+  });
+  const patente = ambulancias?.[0]?.patente;
+
+  const { data: personal } = useQuery({
+    queryKey: queryKeys.personal.list(),
+    queryFn: getPersonal,
+    enabled: opened,
+  });
+  const nombrePersonal = (id?: number) => {
+    const p = personal?.find((p) => p.id === id);
+    return p ? `${p.first_name} ${p.last_name}` : id !== undefined ? `#${id}` : null;
+  };
 
   return (
     <Drawer
@@ -139,7 +158,7 @@ export function DispatchDetailDrawer({
               <Text span fw={500}>
                 Creado por:{" "}
               </Text>
-              #{despacho.creado_por_id}
+              {nombrePersonal(despacho.creado_por_id)}
             </Text>
           )}
           {despacho.asignado_por_id !== undefined && (
@@ -147,7 +166,7 @@ export function DispatchDetailDrawer({
               <Text span fw={500}>
                 Asignado por:{" "}
               </Text>
-              #{despacho.asignado_por_id}
+              {nombrePersonal(despacho.asignado_por_id)}
             </Text>
           )}
 
@@ -162,18 +181,28 @@ export function DispatchDetailDrawer({
                   </List.Item>
                 ))}
               </List>
+              <Divider label="Ambulancia asignada" />
+
+              {despacho.ambulancia_id && (
+                <Text size="sm">
+                  <Text span fw={500}>
+                    Ambulancia:{" "}
+                  </Text>
+                  {patente ?? `#${despacho.ambulancia_id}`}
+                </Text>
+              )}
             </>
           )}
 
           {(despacho.estado === "recibido" ||
             despacho.estado === "programado") && (
-            <Group mt="md">
-              <Button onClick={onAssign}>Asignar</Button>
-              <Button variant="light" onClick={onSchedule}>
-                {despacho.estado === "programado" ? "Reprogramar" : "Programar"}
-              </Button>
-            </Group>
-          )}
+              <Group mt="md">
+                <Button onClick={onAssign}>Asignar</Button>
+                <Button variant="light" onClick={onSchedule}>
+                  {despacho.estado === "programado" ? "Reprogramar" : "Programar"}
+                </Button>
+              </Group>
+            )}
         </Stack>
       )}
     </Drawer>

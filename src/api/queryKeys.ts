@@ -18,6 +18,7 @@ export const queryKeys = {
   },
   ambulancias: {
     list: () => ["ambulancias", "list"] as const,
+    detail: (id: number) => ["ambulancias", "detail", id] as const,
   },
   inventario: {
     list: () => ["inventario", "list"] as const,
