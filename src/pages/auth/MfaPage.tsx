@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { Card, Center, PinInput, Stack, Text, Title } from "@mantine/core";
+import { Card, Center, PinInput, Stack, Text } from "@mantine/core";
 import { ensureCsrfCookie, verifyTotp } from "../../api/auth";
 import { ApiError } from "../../api/client";
 import { useAuthStore } from "../../stores/authStore";
