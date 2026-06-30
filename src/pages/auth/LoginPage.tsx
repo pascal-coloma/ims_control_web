@@ -9,7 +9,6 @@ import {
   Stack,
   Text,
   TextInput,
-  Title,
 } from "@mantine/core";
 import { login } from "../../api/auth";
 import { ApiError } from "../../api/client";
@@ -68,10 +67,14 @@ export function LoginPage() {
     <Center mih="100vh">
       <Card withBorder shadow="sm" radius="md" p="xl" w={380}>
         <Stack gap="md">
-          <div>
-            <Title order={2}>imSystem</Title>
-            <Text c="dimmed">Control — Acceso operadores</Text>
-          </div>
+          <Stack align="center" gap={4}>
+            <img
+              src="/logo_ims.webp"
+              alt="IMS Ambulancias"
+              style={{ width: "100%", maxWidth: 160 }}
+            />
+            <Text c="dimmed">Acceso control</Text>
+          </Stack>
 
           <AuthStepIndicator step={1} />
 
