@@ -85,7 +85,7 @@ export function LoginPage() {
             <Stack gap="sm">
               <TextInput
                 label="Usuario"
-                placeholder="rut o nombre de usuario"
+                placeholder="Ingrese su RUT"
                 value={username}
                 onChange={(e) => handleUsernameChange(e.currentTarget.value)}
                 error={rutError}
@@ -94,6 +94,7 @@ export function LoginPage() {
               />
               <PasswordInput
                 label="Contraseña"
+                placeholder="Ingrese su contraseña"
                 value={password}
                 onChange={(event) => setPassword(event.currentTarget.value)}
                 required
