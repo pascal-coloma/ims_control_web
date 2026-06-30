@@ -47,14 +47,14 @@ export function MfaPage() {
     <Center mih="100vh">
       <Card withBorder shadow="sm" radius="md" p="xl" w={380}>
         <Stack gap="md" align="center">
-          <div>
-            <Title order={2} ta="center">
-              imSystem
-            </Title>
-            <Text c="dimmed" ta="center">
-              Control — Acceso operadores
-            </Text>
-          </div>
+          <Stack align="center" gap={4}>
+            <img
+              src="/logo_ims.webp"
+              alt="IMS Ambulancias"
+              style={{ width: "100%", maxWidth: 160 }}
+            />
+            <Text c="dimmed">Acceso control</Text>
+          </Stack>
 
           <AuthStepIndicator step={2} />
 
