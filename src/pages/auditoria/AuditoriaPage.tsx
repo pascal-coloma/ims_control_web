@@ -164,14 +164,10 @@ function AuditLogFeed({ tipos, search }: AuditLogFeedProps) {
         <Group gap={6}>
           <Loader size="xs" />
           <Text size="xs" c="dimmed">
-            Cargando más registros…
+            Cargando registros…
           </Text>
         </Group>
-      ) : (
-        <Text size="xs" c="dimmed">
-          {entries.length} registros cargados
-        </Text>
-      )}
+      ) : null}
 
       <ScrollArea.Autosize mah="calc(100vh - 280px)">
         <Table.ScrollContainer minWidth={700}>

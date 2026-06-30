@@ -14,6 +14,7 @@ import {
 import { login } from "../../api/auth";
 import { ApiError } from "../../api/client";
 import { useAuthStore } from "../../stores/authStore";
+import { cleanRut, formatRut, validateRut } from "../../utils/rut";
 import { AuthStepIndicator } from "./AuthStepIndicator";
 
 export function LoginPage() {
@@ -25,16 +26,30 @@ export function LoginPage() {
   );
 
   const [username, setUsername] = useState("");
+  const [rutError, setRutError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  function handleUsernameChange(value: string) {
+    if (/^[\d.\-kK]*$/.test(value)) {
+      setUsername(formatRut(value));
+      const clean = cleanRut(value);
+      setRutError(
+        clean.length >= 8 && !validateRut(clean) ? "RUT inválido" : null,
+      );
+    } else {
+      setUsername(value);
+      setRutError(null);
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
-      await login(username, password);
+      await login(username.replace(/\./g, ""), password);
       clearSessionExpired();
       setPendingMfa();
       navigate("/login/mfa");
@@ -72,7 +87,8 @@ export function LoginPage() {
                 label="Usuario"
                 placeholder="rut o nombre de usuario"
                 value={username}
-                onChange={(event) => setUsername(event.currentTarget.value)}
+                onChange={(e) => handleUsernameChange(e.currentTarget.value)}
+                error={rutError}
                 required
                 autoComplete="username"
               />
