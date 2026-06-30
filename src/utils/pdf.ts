@@ -30,7 +30,9 @@ export function generatePDF(data: DocumentoAtencion): void {
     Hash,
   } = data;
 
-  const verifyUrl = `${window.location.origin}/api/documentos/verificar/?hash=${Hash}`;
+  // ponytail: VITE_API_BASE_URL="" in dev (Vite proxy handles /ims/*); set to https://api.imsambulancias.cl in production
+  const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
+  const verifyUrl = `${apiBase}/ims/api/documentos/verificar/?hash=${Hash}`;
   const qrSvg = renderToStaticMarkup(
     createElement(QRCodeSVG, { value: verifyUrl, size: 64, marginSize: 1 }),
   );
