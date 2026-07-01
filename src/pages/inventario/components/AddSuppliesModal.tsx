@@ -8,9 +8,7 @@ import {
   NumberInput,
   Select,
   Stack,
-  Text,
   TextInput,
-  Tooltip,
 } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -20,11 +18,48 @@ import { queryKeys } from "../../../api/queryKeys";
 import { addInventario } from "../../../api/inventario";
 import { showError } from "../../../utils/notify";
 
+// ponytail: catálogo fijo de categorías (tabla `categoria`), porque /inventario
+// puede llegar vacío (p.ej. inventario recién borrado) y ya no hay de dónde derivarlo.
+const CATEGORIA_IDS: Record<string, number> = {
+  ANALGESICOS: 1,
+  SEDANTES: 2,
+  ANTIARRITMICOS: 3,
+  VASOACTIVOS: 4,
+  SUEROS: 5,
+  ANTIBIOTICOS: 6,
+  ANTICONVULSIVANTES: 7,
+  BRONCODILATADORES: 8,
+  CORTICOIDES: 9,
+  ANTIEMETICOS: 10,
+  JERINGAS: 11,
+  AGUJAS: 12,
+  CATETERES: 13,
+  GUANTES: 14,
+  "GASAS Y APOSITOS": 15,
+  VENDAS: 16,
+  "VIA AEREA": 17,
+  OXIGENOTERAPIA: 18,
+  INMOVILIZACION: 19,
+  SUTURA: 20,
+};
+
+// ponytail: /inventario no expone unidad_medida_id (solo el nombre), así que
+// esta tabla es el único lugar que traduce el label elegido al id a enviar.
+const UNIDAD_MEDIDA_IDS: Record<string, number> = {
+  MG: 1,
+  ML: 2,
+  G: 3,
+  UNIDAD: 4,
+  AMPOLLA: 5,
+  FRASCO: 6,
+  CAJA: 7,
+};
+
 interface SupplyRow {
   key: number;
   nombreInsumo: string;
-  categoriaId: number | "";
-  unidadMedidaId: number | "";
+  categoria: string | null;
+  unidadMedida: string | null;
   cantidad: number | "";
   stock: number | "";
   ambulanciaId: string | null;
@@ -35,8 +70,8 @@ function emptyRow(): SupplyRow {
   return {
     key: nextKey++,
     nombreInsumo: "",
-    categoriaId: "",
-    unidadMedidaId: "",
+    categoria: null,
+    unidadMedida: null,
     cantidad: "",
     stock: "",
     ambulanciaId: null,
@@ -46,8 +81,8 @@ function emptyRow(): SupplyRow {
 function isComplete(row: SupplyRow): boolean {
   return (
     row.nombreInsumo.trim() !== "" &&
-    row.categoriaId !== "" &&
-    row.unidadMedidaId !== "" &&
+    row.categoria !== null &&
+    row.unidadMedida !== null &&
     row.cantidad !== "" &&
     row.stock !== "" &&
     row.ambulanciaId !== null
@@ -75,20 +110,18 @@ export function AddSuppliesModal({ opened, onClose }: AddSuppliesModalProps) {
   });
 
   const categoriaOptions = useMemo(() => {
-    const seen = new Map<number, string>();
-    for (const row of inventario.data ?? [])
-      seen.set(row.presentacion.categoria_id, row.presentacion.categoria);
-    return Array.from(seen.entries()).map(([id, nombre]) => ({
-      value: String(id),
-      label: `${nombre} (#${id})`,
-    }));
+    const seen = new Set<string>();
+    for (const row of inventario.data ?? []) seen.add(row.presentacion.categoria);
+    for (const label of Object.keys(CATEGORIA_IDS)) seen.add(label);
+    return Array.from(seen).map((label) => ({ value: label, label }));
   }, [inventario.data]);
 
-  const unidadMedidaHint = useMemo(() => {
+  const unidadMedidaOptions = useMemo(() => {
     const seen = new Set<string>();
     for (const row of inventario.data ?? [])
       seen.add(row.presentacion.unidad_medida);
-    return Array.from(seen).join(", ");
+    for (const label of Object.keys(UNIDAD_MEDIDA_IDS)) seen.add(label);
+    return Array.from(seen).map((label) => ({ value: label, label }));
   }, [inventario.data]);
 
   const ambulanciaOptions = useMemo(
@@ -105,9 +138,9 @@ export function AddSuppliesModal({ opened, onClose }: AddSuppliesModalProps) {
       addInventario(
         rows.map((row) => ({
           nombre_insumo: row.nombreInsumo.trim(),
-          categoria_id: Number(row.categoriaId),
+          categoria_id: CATEGORIA_IDS[row.categoria!],
           cantidad: Number(row.cantidad),
-          unidad_medida_id: Number(row.unidadMedidaId),
+          unidad_medida_id: UNIDAD_MEDIDA_IDS[row.unidadMedida!],
           stock: Number(row.stock),
           ambulancia_id: Number(row.ambulanciaId),
         })),
@@ -147,10 +180,6 @@ export function AddSuppliesModal({ opened, onClose }: AddSuppliesModalProps) {
       size="xl"
     >
       <Stack gap="sm">
-        <Text size="xs" c="dimmed">
-          Unidades de medida existentes (referencia): {unidadMedidaHint || "—"}
-        </Text>
-
         {rows.map((row) => (
           <Card key={row.key} withBorder padding="sm">
             <Group align="flex-end" gap="xs" wrap="wrap">
@@ -167,45 +196,24 @@ export function AddSuppliesModal({ opened, onClose }: AddSuppliesModalProps) {
               />
               <Select
                 label="Categoría"
-                placeholder="Existente"
+                placeholder="Selecciona"
                 data={categoriaOptions}
-                value={row.categoriaId === "" ? null : String(row.categoriaId)}
-                onChange={(value) =>
-                  updateRow(row.key, {
-                    categoriaId: value ? Number(value) : "",
-                  })
-                }
+                value={row.categoria}
+                onChange={(value) => updateRow(row.key, { categoria: value })}
                 searchable
+                required
                 style={{ flex: 1, minWidth: 140 }}
               />
-              <NumberInput
-                label="ID categoría"
-                value={row.categoriaId}
-                onChange={(value) =>
-                  updateRow(row.key, {
-                    categoriaId: typeof value === "number" ? value : "",
-                  })
-                }
-                min={1}
-                w={100}
+              <Select
+                label="Unidad de medida"
+                placeholder="Selecciona"
+                data={unidadMedidaOptions}
+                value={row.unidadMedida}
+                onChange={(value) => updateRow(row.key, { unidadMedida: value })}
+                searchable
                 required
+                style={{ flex: 1, minWidth: 140 }}
               />
-              <Tooltip
-                label={`Unidades existentes: ${unidadMedidaHint || "—"}`}
-              >
-                <NumberInput
-                  label="ID unidad"
-                  value={row.unidadMedidaId}
-                  onChange={(value) =>
-                    updateRow(row.key, {
-                      unidadMedidaId: typeof value === "number" ? value : "",
-                    })
-                  }
-                  min={1}
-                  w={100}
-                  required
-                />
-              </Tooltip>
               <NumberInput
                 label="Cant/dosis"
                 value={row.cantidad}
