@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ActionIcon,
   Badge,
@@ -8,6 +8,7 @@ import {
   Stack,
   Text,
   Table,
+  TextInput,
   Title,
 } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
@@ -19,6 +20,7 @@ import { ListPagination } from "../../components/ListPagination";
 import { TableSkeleton } from "../../components/TableSkeleton";
 import { usePagedData } from "../../hooks/usePagedData";
 import type { AddStaffResponse, PersonalListItem } from "../../types/api";
+import { cleanRut, formatRutDash } from "../../utils/rut";
 import { AddStaffModal } from "./components/AddStaffModal";
 import { ProvisioningResultModal } from "./components/ProvisioningResultModal";
 
@@ -31,13 +33,20 @@ export function PersonalPage() {
   const [confirmDelete, setConfirmDelete] = useState<PersonalListItem | null>(
     null,
   );
+  const [rutFilter, setRutFilter] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.personal.list(),
     queryFn: getPersonal,
   });
 
-  const { page, setPage, totalPages, pageItems } = usePagedData(data ?? []);
+  const filteredData = useMemo(() => {
+    const term = cleanRut(rutFilter);
+    if (!term) return data ?? [];
+    return (data ?? []).filter((p) => cleanRut(p.rut).includes(term));
+  }, [data, rutFilter]);
+
+  const { page, setPage, totalPages, pageItems } = usePagedData(filteredData);
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deletePersonal(id),
@@ -68,6 +77,17 @@ export function PersonalPage() {
           Agregar personal
         </Button>
       </Group>
+
+      <TextInput
+        label="Buscar por RUT"
+        placeholder="12345678-9"
+        value={rutFilter}
+        onChange={(event) =>
+          setRutFilter(formatRutDash(event.currentTarget.value))
+        }
+        mb="md"
+        maw={260}
+      />
 
       <Table striped highlightOnHover>
         <Table.Thead>

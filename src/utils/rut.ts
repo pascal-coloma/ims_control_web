@@ -27,3 +27,12 @@ export function formatRut(value: string): string {
   const dv = clean.slice(-1);
   return body ? `${body}-${dv}` : dv;
 }
+
+/** Masks as-you-type into xxxxxxxx-x (no dots), matching how personal RUTs are stored. */
+export function formatRutDash(value: string): string {
+  const clean = cleanRut(value).slice(0, 9);
+  if (!clean) return "";
+  const body = clean.slice(0, -1);
+  const dv = clean.slice(-1);
+  return body ? `${body}-${dv}` : dv;
+}

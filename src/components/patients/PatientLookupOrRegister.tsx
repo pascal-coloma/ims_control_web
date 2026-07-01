@@ -82,11 +82,13 @@ export function PatientLookupOrRegister({
   });
 
   // El backend guarda el RUT con puntos y guión (formatRut), así que se
-  // busca con ese mismo formato.
+  // busca con ese mismo formato, pero espera el dígito verificador "k" en
+  // minúscula.
   const backendRut = rut;
+  const searchRut = backendRut.replace(/K$/, "k");
 
   function handleSearch() {
-    lookup.mutate(backendRut);
+    lookup.mutate(searchRut);
   }
 
   useEffect(() => {
