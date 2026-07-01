@@ -39,16 +39,17 @@ export function PatientLookupOrRegister({
     queryFn: getPacientes,
   });
 
-  const options = useMemo(
-    () =>
-      (pacientes.data ?? []).map((p) => ({
-        value: formatRut(p.rut),
-        label: p.nombre_completo
-          ? `${formatRut(p.rut)} — ${p.nombre_completo}`
-          : formatRut(p.rut),
-      })),
-    [pacientes.data],
-  );
+  const options = useMemo(() => {
+    const seen = new Map<string, { value: string; label: string }>();
+    for (const p of pacientes.data ?? []) {
+      const value = formatRut(p.rut);
+      seen.set(value, {
+        value,
+        label: p.nombre_completo ? `${value} — ${p.nombre_completo}` : value,
+      });
+    }
+    return Array.from(seen.values());
+  }, [pacientes.data]);
 
   const lookup = useMutation({
     mutationFn: (lookupRut: string) => getPaciente(lookupRut),

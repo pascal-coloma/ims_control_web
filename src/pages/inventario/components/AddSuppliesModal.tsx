@@ -111,7 +111,8 @@ export function AddSuppliesModal({ opened, onClose }: AddSuppliesModalProps) {
 
   const categoriaOptions = useMemo(() => {
     const seen = new Set<string>();
-    for (const row of inventario.data ?? []) seen.add(row.presentacion.categoria);
+    for (const row of inventario.data ?? [])
+      seen.add(row.presentacion.categoria);
     for (const label of Object.keys(CATEGORIA_IDS)) seen.add(label);
     return Array.from(seen).map((label) => ({ value: label, label }));
   }, [inventario.data]);
@@ -209,7 +210,9 @@ export function AddSuppliesModal({ opened, onClose }: AddSuppliesModalProps) {
                 placeholder="Selecciona"
                 data={unidadMedidaOptions}
                 value={row.unidadMedida}
-                onChange={(value) => updateRow(row.key, { unidadMedida: value })}
+                onChange={(value) =>
+                  updateRow(row.key, { unidadMedida: value })
+                }
                 searchable
                 required
                 style={{ flex: 1, minWidth: 140 }}
