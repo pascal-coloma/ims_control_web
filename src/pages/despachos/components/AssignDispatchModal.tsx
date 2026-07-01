@@ -77,6 +77,7 @@ export function AssignDispatchModal({
       queryClient.invalidateQueries({
         queryKey: queryKeys.despachos.detail(despachoId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.ambulancias.list() });
       handleClose();
     },
     onError: (err) => {

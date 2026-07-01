@@ -98,6 +98,7 @@ export function NewDispatchModal({ opened, onClose }: NewDispatchModalProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.despachos.list() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.ambulancias.list() });
       handleClose();
     },
   });
