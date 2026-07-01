@@ -43,9 +43,7 @@ export function PatientRegistrationFields({
   });
 
   function handleSubmit(values: FormValues) {
-    // Se guarda sin puntos (con guión) para que coincida con el formato
-    // que usa la búsqueda en PatientLookupOrRegister.
-    const data: Paciente = { rut: values.rut.trim().replace(/\./g, "") };
+    const data: Paciente = { rut: values.rut.trim() };
     if (values.nombre_completo.trim())
       data.nombre_completo = values.nombre_completo.trim();
     if (values.fecha_nacimiento)

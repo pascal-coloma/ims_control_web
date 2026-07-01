@@ -81,14 +81,16 @@ export function PatientLookupOrRegister({
     },
   });
 
-  const backendRut = rut.replace(/\./g, "");
+  // El backend guarda el RUT con puntos y guión (formatRut), así que se
+  // busca con ese mismo formato.
+  const backendRut = rut;
 
   function handleSearch() {
     lookup.mutate(backendRut);
   }
 
   useEffect(() => {
-    if (RUT_FORMAT.test(backendRut)) handleSearch();
+    if (RUT_FORMAT.test(backendRut.replace(/\./g, ""))) handleSearch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [backendRut]);
 

@@ -95,7 +95,9 @@ export function AmbulanceGrid() {
               <List size="sm" mb="sm">
                 {amb.stock.slice(0, 5).map((item, i) => (
                   <List.Item key={i}>
-                    {item.insumo_nombre}: {item.stock} {item.unidad_medida}
+                    {item.insumo_nombre}: {item.stock} unidad
+                    {item.stock === 1 ? "" : "es"} de {item.insumo_cantidad}{" "}
+                    {item.unidad_medida}
                   </List.Item>
                 ))}
                 {amb.stock.length === 0 && (
