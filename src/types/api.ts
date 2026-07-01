@@ -163,6 +163,17 @@ export interface Ambulancia {
   stock: AmbulanciaStockItem[];
 }
 
+export interface RegisterAmbulanciaRequest {
+  patente: string;
+  modelo: string;
+  estado_disponibilidad?: AmbulanciaEstado;
+}
+
+export interface RegisterAmbulanciaResponse {
+  success: string;
+  ambulancia_id: number;
+}
+
 // --- Inventario ---
 
 export interface InventarioRow {

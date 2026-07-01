@@ -1,8 +1,19 @@
-import { get, patch } from "./client";
-import type { Ambulancia, AmbulanciaEstado } from "../types/api";
+import { get, patch, post } from "./client";
+import type {
+  Ambulancia,
+  AmbulanciaEstado,
+  RegisterAmbulanciaRequest,
+  RegisterAmbulanciaResponse,
+} from "../types/api";
 
 export function getAmbulancias(): Promise<Ambulancia[]> {
   return get<Ambulancia[]>("/ims/api/ambulancias/");
+}
+
+export function registrarAmbulancia(
+  data: RegisterAmbulanciaRequest,
+): Promise<RegisterAmbulanciaResponse> {
+  return post<RegisterAmbulanciaResponse>("/ims/api/ambulancias/add/", data);
 }
 
 // El endpoint lee request.query_params (no JSON body), ver

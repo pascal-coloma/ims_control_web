@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Badge,
+  Button,
   Group,
   Select,
   Table,
@@ -8,6 +9,7 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cambiarEstadoAmbulancia, getAmbulancias } from "../../api/ambulancias";
 import { queryKeys } from "../../api/queryKeys";
@@ -22,6 +24,7 @@ import {
 import { usePagedData } from "../../hooks/usePagedData";
 import { showError } from "../../utils/notify";
 import type { AmbulanciaEstado } from "../../types/api";
+import { RegisterAmbulanceModal } from "./components/RegisterAmbulanceModal";
 
 const COLUMN_COUNT = 3;
 const POLL_INTERVAL_MS = 120_000;
@@ -37,6 +40,7 @@ const ESTADO_EDITABLE_OPTIONS = ESTADO_OPTIONS.filter((o) =>
 export function FlotaPage() {
   const [search, setSearch] = useState("");
   const [estadoFilter, setEstadoFilter] = useState<string | null>(null);
+  const [registerOpen, setRegisterOpen] = useState(false);
 
   const ambulancias = useQuery({
     queryKey: queryKeys.ambulancias.list(),
@@ -69,9 +73,15 @@ export function FlotaPage() {
 
   return (
     <>
-      <Title order={2} mb="md">
-        Flota
-      </Title>
+      <Group justify="space-between" mb="md">
+        <Title order={2}>Flota</Title>
+        <Button
+          leftSection={<IconPlus size={16} />}
+          onClick={() => setRegisterOpen(true)}
+        >
+          Agregar ambulancia
+        </Button>
+      </Group>
 
       <Group align="flex-end" mb="md">
         <TextInput
@@ -140,6 +150,11 @@ export function FlotaPage() {
         </Text>
       )}
       <ListPagination page={page} totalPages={totalPages} onChange={setPage} />
+
+      <RegisterAmbulanceModal
+        opened={registerOpen}
+        onClose={() => setRegisterOpen(false)}
+      />
     </>
   );
 }
